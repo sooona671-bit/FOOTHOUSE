@@ -35,7 +35,16 @@ function Home() {
         </Link>
 
         <div className="relative overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm">
-          <img src={heroImage} alt="New season drop" width={832} height={1024} className="h-48 w-full object-cover object-top opacity-75" />
+          <img
+            src={heroImage}
+            alt="New season drop"
+            width={832}
+            height={1024}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="h-48 w-full object-cover object-top opacity-75"
+          />
           <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-5">
             <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">Edition 01 • Spring 2025</span>
             <h2 className="text-headline-md">THE NEW STANDARD</h2>

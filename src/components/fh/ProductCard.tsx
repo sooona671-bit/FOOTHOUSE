@@ -12,7 +12,15 @@ export function ProductCard({ p, className }: { p: ProductWithUrls; className?: 
       <Link to="/product/$id" params={{ id: p.id }} className="block">
         <div className="relative aspect-square overflow-hidden rounded-xl bg-surface">
           {p.imageUrls[0] ? (
-            <img src={p.imageUrls[0]} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
+            <img
+              src={p.imageUrls[0]}
+              alt={p.name}
+              width={600}
+              height={600}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-outline">
               <Icon name="hide_image" className="text-[32px]" />

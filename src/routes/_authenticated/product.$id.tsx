@@ -69,7 +69,16 @@ function ProductPage() {
     }>
       <div className="aspect-square overflow-hidden rounded-3xl bg-surface">
         {p.imageUrls[img] ? (
-          <img src={p.imageUrls[img]} alt={p.name} className="h-full w-full object-cover" />
+          <img
+            src={p.imageUrls[img]}
+            alt={p.name}
+            width={800}
+            height={800}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-outline"><Icon name="hide_image" className="text-[40px]" /></div>
         )}
@@ -78,7 +87,15 @@ function ProductPage() {
         <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
           {p.imageUrls.map((u, i) => (
             <button key={u} onClick={() => setImg(i)} className={cn("h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2", i === img ? "border-primary" : "border-transparent")}>
-              <img src={u} alt="" className="h-full w-full object-cover" />
+              <img
+                src={u}
+                alt=""
+                width={64}
+                height={64}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>

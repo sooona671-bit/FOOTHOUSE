@@ -37,7 +37,17 @@ function Bag() {
           {cart.items.map((i) => (
             <li key={i.id} className="flex gap-3 rounded-2xl border border-border p-2">
               <Link to="/product/$id" params={{ id: i.product_id }} className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface">
-                {i.product.imageUrls[0] && <img src={i.product.imageUrls[0]} alt={i.product.name} className="h-full w-full object-cover" />}
+                {i.product.imageUrls[0] && (
+                  <img
+                    src={i.product.imageUrls[0]}
+                    alt={i.product.name}
+                    width={80}
+                    height={80}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                )}
               </Link>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-label-md text-foreground">{i.product.name}</p>

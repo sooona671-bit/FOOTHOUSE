@@ -37,7 +37,19 @@ function Categories() {
 function Tile({ label, category, count, img }: { label: string; category?: string | undefined; count: number; img?: string | undefined }) {
   return (
     <Link to="/search" search={category ? { category } : {}} className="relative block aspect-square overflow-hidden rounded-2xl bg-surface">
-      {img ? <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover opacity-80" /> : <Icon name="footprint" className="absolute inset-0 m-auto h-fit w-fit text-[40px] text-outline" />}
+      {img ? (
+        <img
+          src={img}
+          alt=""
+          width={400}
+          height={400}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-80"
+        />
+      ) : (
+        <Icon name="footprint" className="absolute inset-0 m-auto h-fit w-fit text-[40px] text-outline" />
+      )}
       <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-3 text-primary-foreground">
         <span className="text-label-lg">{label}</span>
         <span className="text-[11px] opacity-80">{count} item{count === 1 ? "" : "s"}</span>

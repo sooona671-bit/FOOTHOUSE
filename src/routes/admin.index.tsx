@@ -59,7 +59,17 @@ function AdminProducts() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-surface">
-                        {p.imageUrls[0] && <img src={p.imageUrls[0]} alt={p.name} className="h-full w-full object-cover" />}
+                        {p.imageUrls[0] && (
+                          <img
+                            src={p.imageUrls[0]}
+                            alt={p.name}
+                            width={48}
+                            height={48}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-cover"
+                          />
+                        )}
                       </div>
                       <div><p className="font-semibold text-foreground">{p.name}</p><p className="text-xs text-muted-foreground">{p.category}</p></div>
                     </div>
