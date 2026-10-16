@@ -1,0 +1,196 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * FOOT HOUSE design system — monochrome premium footwear aesthetic,
+ * ported from the original prototype (Plus Jakarta Sans, black/white,
+ * soft grey surfaces, pill buttons, 16px-radius fields).
+ */
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-stage: var(--stage);
+  --color-stage-foreground: var(--stage-foreground);
+  --color-highlight: var(--highlight);
+  --color-outline: var(--outline);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 1rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.22 0.002 197);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.002 197);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.002 197);
+  --primary: oklch(0 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.962 0.001 286);
+  --secondary-foreground: oklch(0.47 0 0);
+  --muted: oklch(0.962 0.001 286);
+  --muted-foreground: oklch(0.47 0 0);
+  --accent: oklch(0.93 0 0);
+  --accent-foreground: oklch(0 0 0);
+  --destructive: oklch(0.5 0.19 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.92 0.002 286);
+  --input: oklch(0.92 0.002 286);
+  --ring: oklch(0 0 0);
+  --surface: oklch(0.962 0.001 286);
+  --surface-high: oklch(0.93 0 0);
+  --stage: oklch(0.15 0 0);
+  --stage-foreground: oklch(1 0 0);
+  --highlight: oklch(0.7 0.15 163);
+  --outline: oklch(0.56 0.004 197);
+  --chart-1: oklch(0.2 0 0);
+  --chart-2: oklch(0.4 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.75 0 0);
+  --chart-5: oklch(0.7 0.15 163);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.22 0.002 197);
+  --sidebar-primary: oklch(0 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.962 0.001 286);
+  --sidebar-accent-foreground: oklch(0 0 0);
+  --sidebar-border: oklch(0.92 0.002 286);
+  --sidebar-ring: oklch(0 0 0);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-color: var(--color-stage);
+    color: var(--color-foreground);
+  }
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+/* Typography scale from the prototype */
+@utility text-display {
+  font-size: 30px;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+@utility text-headline-lg {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+@utility text-headline-md {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+@utility text-headline-sm {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+@utility text-label-lg {
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+@utility text-label-md {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+@utility text-caption {
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@utility bg-hero-fade {
+  background-image: linear-gradient(to top, var(--background), transparent 55%, oklch(0 0 0 / 0.2));
+}
+@utility bg-banner-fade {
+  background-image: linear-gradient(to top, oklch(0 0 0 / 0.85), oklch(0 0 0 / 0.1));
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  user-select: none;
+}
+.material-symbols-outlined.filled {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+@keyframes fh-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@utility animate-screen {
+  animation: fh-fade-in 0.3s ease-out both;
+}
