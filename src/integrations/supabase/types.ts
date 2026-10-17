@@ -121,6 +121,39 @@ export type Database = {
         }
         Relationships: []
       }
+      home_banner: {
+        Row: {
+          button_link: string
+          button_text: string
+          eyebrow: string
+          id: number
+          image_path: string | null
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_link?: string
+          button_text?: string
+          eyebrow?: string
+          id?: number
+          image_path?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          button_link?: string
+          button_text?: string
+          eyebrow?: string
+          id?: number
+          image_path?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string

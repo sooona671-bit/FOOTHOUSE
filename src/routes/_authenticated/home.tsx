@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { departments, heroImage } from "@/data/sample-catalog";
+import { bannerImageUrl, bannerQuery, BANNER_DEFAULTS } from "@/lib/banner";
 import { publishedProductsQuery } from "@/lib/products";
 import { Icon } from "@/components/fh/primitives";
 import { ProductCard } from "@/components/fh/ProductCard";
@@ -23,12 +24,14 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function Home() {
   const [dept, setDept] = useState(departments[0]);
+  const { data: customBanner } = useQuery(bannerQuery);
   const { data: products = [], isLoading, error } = useQuery(publishedProductsQuery);
+  const banner = { ...BANNER_DEFAULTS, ...(customBanner ?? {}) };
   const shown = dept === departments[0] ? products : products.filter((p) => p.category === dept);
   return (
     <StorePage>
       <div className="space-y-5 px-5 pb-6 pt-3">
-        <Link to="/search" className="flex h-12 w-full items-center gap-3 rounded-2xl bg-surface px-4 transition hover:bg-surface-high">
+        <Link to="/search" className="flex h-12 w-full items-center gap-3 rounded-2xl bg-surface px-4 transition hover:bg-surface-high lg:hidden">
           <Icon name="search" className="text-[20px] text-outline" />
           <span className="flex-1 text-xs text-outline">Search sneakers, boots, formal…</span>
           <Icon name="tune" className="text-[18px] text-outline" />
@@ -36,8 +39,8 @@ function Home() {
 
         <div className="relative overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm lg:aspect-[21/9] lg:rounded-3xl">
           <img
-            src={heroImage}
-            alt="New season drop"
+            src={bannerImageUrl(banner.image_path) ?? heroImage}
+            alt={banner.title || "New season drop"}
             width={832}
             height={1024}
             loading="eager"
@@ -46,12 +49,12 @@ function Home() {
             className="h-48 w-full object-cover object-top opacity-75 lg:h-full"
           />
           <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-5">
-            <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">Edition 01 • Spring 2025</span>
-            <h2 className="text-headline-md">THE NEW STANDARD</h2>
-            <p className="text-xs text-primary-foreground/80">25% Off Minimalist Footwear</p>
-            <Link to="/search" className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">
-              Shop Drop <Icon name="arrow_forward" className="text-[16px]" />
-            </Link>
+            {banner.eyebrow && <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{banner.eyebrow}</span>}
+            {banner.title && <h2 className="text-headline-md">{banner.title}</h2>}
+            {banner.subtitle && <p className="text-xs text-primary-foreground/80">{banner.subtitle}</p>}
+            {banner.button_text && <Link to={banner.button_link as "/search" | "/categories" | "/wishlist" | "/home"} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">
+              {banner.button_text} <Icon name="arrow_forward" className="text-[16px]" />
+            </Link>}
           </div>
         </div>
 

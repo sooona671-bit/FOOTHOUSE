@@ -11,6 +11,9 @@ type Props = {
   onCancel: () => void;
   outputSize?: number;
   round?: boolean;
+  aspect?: number;
+  guideAspect?: number;
+  allowFit?: boolean;
 };
 
 /**
@@ -18,7 +21,7 @@ type Props = {
  * see in the store. Drag to move, use the slider to zoom.
  * Zooming all the way out fits the whole photo and fills the extra space with white.
  */
-export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round = false }: Props) {
+export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round = false, aspect = 1, guideAspect, allowFit = true }: Props) {
   const [url, setUrl] = useState<string | null>(null);
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -52,16 +55,18 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
   }, []);
 
   // Scale limits: "contain" shows the whole photo, "cover" fills the frame.
-  const contain = nat ? frame / Math.max(nat.w, nat.h) : 1;
-  const cover = nat ? frame / Math.min(nat.w, nat.h) : 1;
+  const frameHeight = frame / aspect;
+  const contain = nat ? Math.min(frame / nat.w, frameHeight / nat.h) : 1;
+  const cover = nat ? Math.max(frame / nat.w, frameHeight / nat.h) : 1;
   const maxScale = Math.max(cover * MAX_ZOOM, contain * 1.5);
   const tFill = maxScale > contain ? (cover - contain) / (maxScale - contain) : 0;
+  const minZoom = allowFit ? 0 : tFill;
   const scale = contain + t * (maxScale - contain);
 
   const clampPos = (p: { x: number; y: number }) => {
     if (!nat) return { x: 0, y: 0 };
     const limX = Math.max(0, (nat.w * scale - frame) / 2);
-    const limY = Math.max(0, (nat.h * scale - frame) / 2);
+    const limY = Math.max(0, (nat.h * scale - frameHeight) / 2);
     return { x: Math.min(limX, Math.max(-limX, p.x)), y: Math.min(limY, Math.max(-limY, p.y)) };
   };
   const eff = clampPos(pos);
@@ -75,8 +80,9 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
       const h = img.naturalHeight;
       if (!w || !h) throw new Error("Image has no dimensions");
       const f = Math.max(220, Math.min(360, window.innerWidth - 80));
-      const c = f / Math.max(w, h);
-      const v = f / Math.min(w, h);
+      const fh = f / aspect;
+      const c = Math.min(f / w, fh / h);
+      const v = Math.max(f / w, fh / h);
       const m = Math.max(v * MAX_ZOOM, c * 1.5);
       setNat({ w, h });
       setT(m > c ? (v - c) / (m - c) : 0); // start with the frame filled
@@ -90,7 +96,7 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
   };
 
   const setFill = () => {
-    if (nat) {
+    if (nat && allowFit) {
       setT(tFill);
       setPos({ x: 0, y: 0 });
     }
@@ -107,8 +113,9 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
     if (!img || !nat) return;
     setBusy(true);
     const canvas = document.createElement("canvas");
+    const outputHeight = Math.round(outputSize / aspect);
     canvas.width = outputSize;
-    canvas.height = outputSize;
+    canvas.height = outputHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       setBusy(false);
@@ -116,12 +123,12 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
       return;
     }
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, outputSize, outputSize);
+    ctx.fillRect(0, 0, outputSize, outputHeight);
     ctx.imageSmoothingQuality = "high";
     const k = outputSize / frame;
     const dw = nat.w * scale * k;
     const dh = nat.h * scale * k;
-    ctx.drawImage(img, outputSize / 2 + eff.x * k - dw / 2, outputSize / 2 + eff.y * k - dh / 2, dw, dh);
+    ctx.drawImage(img, outputSize / 2 + eff.x * k - dw / 2, outputHeight / 2 + eff.y * k - dh / 2, dw, dh);
     canvas.toBlob(
       (blob) => {
         setBusy(false);
@@ -152,7 +159,7 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
 
         <div
           className="relative mx-auto mt-4 cursor-grab touch-none select-none overflow-hidden rounded-2xl bg-white ring-1 ring-border active:cursor-grabbing"
-          style={{ width: frame, height: frame }}
+          style={{ width: frame, height: frameHeight }}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
             drag.current = { px: e.clientX, py: e.clientY, x: eff.x, y: eff.y };
@@ -168,7 +175,7 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
           onPointerCancel={() => {
             drag.current = null;
           }}
-          onWheel={(e) => setT((v) => Math.min(1, Math.max(0, v - e.deltaY * 0.001)))}
+          onWheel={(e) => setT((v) => Math.min(1, Math.max(minZoom, v - e.deltaY * 0.001)))}
         >
           {url && (
             <img
@@ -202,6 +209,14 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
             <div className="absolute left-0 top-1/3 h-px w-full bg-black/15" />
             <div className="absolute left-0 top-2/3 h-px w-full bg-black/15" />
             {round && <div className="absolute inset-0 rounded-full border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />}
+            {guideAspect && (
+              <div
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-dashed border-white/90"
+                style={{ width: frameHeight * guideAspect, height: frameHeight }}
+              >
+                <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">Phone view</span>
+              </div>
+            )}
           </div>
           {loading && (
             <p className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">
@@ -219,12 +234,12 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
           <Icon name="zoom_out" className="text-[20px] text-muted-foreground" />
           <input
             type="range"
-            min={0}
+            min={minZoom}
             max={1}
             step={0.001}
             value={t}
             disabled={loading || !nat || broken}
-            onChange={(e) => setT(Number(e.target.value))}
+            onChange={(e) => setT(Math.max(minZoom, Number(e.target.value)))}
             aria-label="Zoom"
             className="h-2 w-full cursor-pointer accent-black"
           />
@@ -240,14 +255,16 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
           >
             Fill the square
           </button>
-          <button
-            type="button"
-            disabled={loading || !nat || broken}
-            onClick={setFit}
-            className="h-9 flex-1 rounded-full bg-surface text-xs font-semibold text-foreground"
-          >
-            Fit whole photo
-          </button>
+          {allowFit && (
+            <button
+              type="button"
+              disabled={loading || !nat || broken}
+              onClick={setFit}
+              className="h-9 flex-1 rounded-full bg-surface text-xs font-semibold text-foreground"
+            >
+              Fit whole photo
+            </button>
+          )}
         </div>
 
         <div className="mt-5 flex gap-3">

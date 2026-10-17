@@ -30,6 +30,7 @@ import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdRouteImport } from './routes/admin.$id'
+import { Route as AdminBannerRouteImport } from './routes/admin.banner'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
 import { Route as AdminForgotRouteImport } from './routes/admin_.forgot'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
@@ -147,6 +148,11 @@ const AdminIdRoute = AdminIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBannerRoute = AdminBannerRouteImport.update({
+  id: '/banner',
+  path: '/banner',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNewRoute = AdminNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
+  '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/forgot': typeof AdminForgotRoute
   '/admin/login': typeof AdminLoginRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
+  '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/forgot': typeof AdminForgotRoute
   '/admin/login': typeof AdminLoginRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
+  '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
   '/admin_/forgot': typeof AdminForgotRoute
   '/admin_/login': typeof AdminLoginRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/wishlist'
     | '/admin/$id'
+    | '/admin/banner'
     | '/admin/new'
     | '/admin/forgot'
     | '/admin/login'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/wishlist'
     | '/admin/$id'
+    | '/admin/banner'
     | '/admin/new'
     | '/admin/forgot'
     | '/admin/login'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/_authenticated/wishlist'
     | '/admin/$id'
+    | '/admin/banner'
     | '/admin/new'
     | '/admin_/forgot'
     | '/admin_/login'
@@ -553,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/banner': {
+      id: '/admin/banner'
+      path: '/banner'
+      fullPath: '/admin/banner'
+      preLoaderRoute: typeof AdminBannerRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/new': {
       id: '/admin/new'
       path: '/new'
@@ -667,12 +686,14 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminIdRoute: typeof AdminIdRoute
+  AdminBannerRoute: typeof AdminBannerRoute
   AdminNewRoute: typeof AdminNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIdRoute: AdminIdRoute,
+  AdminBannerRoute: AdminBannerRoute,
   AdminNewRoute: AdminNewRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
