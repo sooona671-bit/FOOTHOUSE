@@ -2,8 +2,8 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useRouter } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
-import logoSimple from "@/assets/logo-simple.png";
+
+const brandLogo = "/assets/brand-logo.png";
 
 export const BRAND = "FOOT HOUSE";
 
@@ -137,9 +137,9 @@ export function ScreenHeader({ title, onBack, right, brand }: { title?: string; 
 
 export function Monogram({ size = "sm" }: { size?: "sm" | "lg" }) {
   return size === "lg" ? (
-    <img src={logo} alt="FOOT HOUSE" className="h-24 w-24 rounded-3xl object-contain shadow-2xl" />
+    <img src={brandLogo} alt="FOOT HOUSE" className="h-24 w-24 rounded-3xl object-contain shadow-2xl" />
   ) : (
-    <img src={logoSimple} alt="FOOT HOUSE" className="h-7 w-7 rounded-lg object-contain" />
+    <img src={brandLogo} alt="FOOT HOUSE" className="h-7 w-7 rounded-lg object-contain" />
   );
 }
 
