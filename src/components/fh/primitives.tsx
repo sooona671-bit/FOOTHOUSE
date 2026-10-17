@@ -16,7 +16,7 @@ export function Icon({ name, className, filled }: { name: string; className?: st
 }
 
 export const fhButton = cva(
-  "inline-flex items-center justify-center gap-2 rounded-full transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:pointer-events-none select-none",
+  "inline-flex items-center justify-center gap-2 rounded-full transition-transform duration-100 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none",
   {
     variants: {
       variant: {
@@ -137,9 +137,9 @@ export function ScreenHeader({ title, onBack, right, brand }: { title?: string; 
 
 export function Monogram({ size = "sm" }: { size?: "sm" | "lg" }) {
   return size === "lg" ? (
-    <img src={brandLogo} alt="FOOT HOUSE" className="h-24 w-24 rounded-3xl object-contain shadow-2xl" />
+    <img src={brandLogo} alt="FOOT HOUSE" width={96} height={96} decoding="async" className="h-24 w-24 rounded-3xl object-contain shadow-2xl" />
   ) : (
-    <img src={brandLogo} alt="FOOT HOUSE" className="h-7 w-7 rounded-lg object-contain" />
+    <img src={brandLogo} alt="FOOT HOUSE" width={28} height={28} decoding="async" className="h-7 w-7 rounded-lg object-contain" />
   );
 }
 

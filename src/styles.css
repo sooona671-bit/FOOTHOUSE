@@ -111,9 +111,21 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, a, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+  }
   body {
     background-color: var(--color-stage);
     color: var(--color-foreground);
+  }
+  @media (max-width: 47.999rem) {
+    html,
+    body {
+      background-color: var(--background);
+    }
   }
   ::selection {
     background: var(--color-primary);

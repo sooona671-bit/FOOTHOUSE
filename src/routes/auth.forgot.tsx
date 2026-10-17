@@ -35,7 +35,7 @@ function Forgot() {
   };
 
   return (
-    <Screen className="justify-between bg-background px-7 py-3">
+    <Screen className="justify-between bg-background px-7 py-3 lg:mx-auto lg:max-w-md">
       <ScreenHeader title="Forgot Password" onBack={() => navigate({ to: "/auth/sign-in" })} />
       <div className="my-6 flex flex-col items-center">
         <div className="mb-4 flex h-28 w-28 items-center justify-center rounded-full border border-surface-high bg-surface">

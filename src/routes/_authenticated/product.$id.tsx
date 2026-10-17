@@ -67,75 +67,81 @@ function ProductPage() {
         <Icon name="favorite" filled={wish.has(p.id)} className="text-[22px]" />
       </button>
     }>
-      <div className="aspect-square overflow-hidden rounded-3xl bg-surface">
-        {p.imageUrls[img] ? (
-          <img
-            src={p.imageUrls[img]}
-            alt={p.name}
-            width={800}
-            height={800}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-outline"><Icon name="hide_image" className="text-[40px]" /></div>
-        )}
-      </div>
-      {p.imageUrls.length > 1 && (
-        <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
-          {p.imageUrls.map((u, i) => (
-            <button key={u} onClick={() => setImg(i)} className={cn("h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2", i === img ? "border-primary" : "border-transparent")}>
+      <div className="lg:grid lg:grid-cols-2 lg:gap-10">
+        <div>
+          <div className="aspect-square overflow-hidden rounded-3xl bg-surface">
+            {p.imageUrls[img] ? (
               <img
-                src={u}
-                alt=""
-                width={64}
-                height={64}
-                loading="lazy"
+                src={p.imageUrls[img]}
+                alt={p.name}
+                width={800}
+                height={800}
+                loading="eager"
                 decoding="async"
+                fetchPriority="high"
                 className="h-full w-full object-cover"
               />
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="mt-5 space-y-1">
-        <p className="text-[11px] uppercase tracking-widest text-outline">{p.category}</p>
-        <h1 className="text-headline-md text-foreground">{p.name}</h1>
-        <p className="text-lg font-bold text-foreground">
-          {npr(p.price)}
-          {off > 0 && (
-            <>
-              <span className="ml-2 text-sm font-normal text-outline line-through">{npr(p.compare_at_price!)}</span>
-              <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">{off}% OFF</span>
-            </>
+            ) : (
+              <div className="flex h-full items-center justify-center text-outline"><Icon name="hide_image" className="text-[40px]" /></div>
+            )}
+          </div>
+          {p.imageUrls.length > 1 && (
+            <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
+              {p.imageUrls.map((u, i) => (
+                <button key={u} onClick={() => setImg(i)} className={cn("h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2", i === img ? "border-primary" : "border-transparent")}>
+                  <img
+                    src={u}
+                    alt=""
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           )}
-        </p>
-        <p className={cn("text-xs", soldOut ? "text-destructive" : "text-muted-foreground")}>
-          {soldOut ? "Sold out" : p.stock <= 5 ? `Only ${p.stock} left` : "In stock"}
-        </p>
-      </div>
-      {p.description && <p className="mt-4 whitespace-pre-line text-sm text-muted-foreground">{p.description}</p>}
-      {sizes.length > 0 && (
-        <Options label="Size" values={sizes} value={size} onChange={setSize} />
-      )}
-      {p.colors.length > 0 && (
-        <Options label="Colour" values={p.colors} value={color} onChange={setColor} />
-      )}
-      <div className="mt-6 space-y-3">
-        <FhButton disabled={soldOut || order.sending} onClick={buyNow}>
-          <Icon name="chat" className="text-[20px]" />
-          {soldOut ? "Sold Out" : order.sending ? "Opening WhatsApp…" : "Buy Now on WhatsApp"}
-        </FhButton>
-        <div className="flex gap-3">
-          <FhButton variant="outline" disabled={soldOut || cart.adding} onClick={addToBag}>
-            <Icon name="shopping_bag" className="text-[20px]" />
-            {cart.adding ? "Adding…" : "Add to Bag"}
-          </FhButton>
-          <FhButton variant="outline" size="icon" aria-label="Open bag" onClick={() => navigate({ to: "/bag" })}>
-            <Icon name="shopping_bag" className="text-[20px]" />
-          </FhButton>
+        </div>
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="mt-5 space-y-1 lg:mt-0">
+            <p className="text-[11px] uppercase tracking-widest text-outline">{p.category}</p>
+            <h1 className="text-headline-md text-foreground">{p.name}</h1>
+            <p className="text-lg font-bold text-foreground">
+              {npr(p.price)}
+              {off > 0 && (
+                <>
+                  <span className="ml-2 text-sm font-normal text-outline line-through">{npr(p.compare_at_price!)}</span>
+                  <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">{off}% OFF</span>
+                </>
+              )}
+            </p>
+            <p className={cn("text-xs", soldOut ? "text-destructive" : "text-muted-foreground")}>
+              {soldOut ? "Sold out" : p.stock <= 5 ? `Only ${p.stock} left` : "In stock"}
+            </p>
+          </div>
+          {p.description && <p className="mt-4 whitespace-pre-line text-sm text-muted-foreground">{p.description}</p>}
+          {sizes.length > 0 && (
+            <Options label="Size" values={sizes} value={size} onChange={setSize} />
+          )}
+          {p.colors.length > 0 && (
+            <Options label="Colour" values={p.colors} value={color} onChange={setColor} />
+          )}
+          <div className="mt-6 space-y-3">
+            <FhButton disabled={soldOut || order.sending} onClick={buyNow}>
+              <Icon name="chat" className="text-[20px]" />
+              {soldOut ? "Sold Out" : order.sending ? "Opening WhatsApp…" : "Buy Now on WhatsApp"}
+            </FhButton>
+            <div className="flex gap-3">
+              <FhButton variant="outline" disabled={soldOut || cart.adding} onClick={addToBag}>
+                <Icon name="shopping_bag" className="text-[20px]" />
+                {cart.adding ? "Adding…" : "Add to Bag"}
+              </FhButton>
+              <FhButton variant="outline" size="icon" aria-label="Open bag" onClick={() => navigate({ to: "/bag" })}>
+                <Icon name="shopping_bag" className="text-[20px]" />
+              </FhButton>
+            </div>
+          </div>
         </div>
       </div>
     </Shell>

@@ -122,7 +122,7 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
             <div className="grid grid-cols-2 gap-2">
               {images.map((img) => (
                 <div key={img.path} className="relative aspect-square overflow-hidden rounded-xl bg-surface">
-                  {img.url && <img src={img.url} alt="Product" className="h-full w-full object-cover" />}
+                  {img.url && <img src={img.url} alt="Product" decoding="async" className="h-full w-full object-cover" />}
                   <button type="button" aria-label="Crop photo" onClick={() => recrop(img)}
                     className="absolute bottom-1.5 left-1.5 flex h-7 items-center gap-1 rounded-full bg-background px-2 text-[11px] font-semibold text-foreground shadow">
                     <Icon name="crop" className="text-[14px]" /> Crop

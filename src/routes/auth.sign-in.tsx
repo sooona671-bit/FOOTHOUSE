@@ -47,7 +47,7 @@ function SignIn() {
   };
 
   return (
-    <Screen className="justify-between bg-background px-7 py-3">
+    <Screen className="justify-between bg-background px-7 py-3 lg:mx-auto lg:max-w-md">
       <ScreenHeader brand onBack={() => navigate({ to: "/auth" })} />
       <div className="my-5">
         <h2 className="text-display text-foreground">Login to Your Account</h2>

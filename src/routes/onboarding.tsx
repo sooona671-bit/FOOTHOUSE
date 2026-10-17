@@ -40,9 +40,9 @@ function Onboarding() {
   };
 
   return (
-    <section key={i} className="animate-screen relative flex min-h-full flex-1 flex-col justify-between bg-background">
+    <section key={i} className="animate-screen relative flex min-h-full flex-1 flex-col justify-between bg-background lg:mx-auto lg:w-full lg:max-w-md">
       <div className="relative h-[52dvh] max-h-[460px] min-h-[300px] w-full overflow-hidden bg-surface">
-        <img src={s.img} alt={s.title} width={832} height={1024} className={`h-full w-full object-cover ${s.pos}`} />
+        <img src={s.img} alt={s.title} width={832} height={1024} decoding="async" className={`h-full w-full object-cover ${s.pos}`} />
         <div className="bg-hero-fade absolute inset-0" />
         <button onClick={finish} className="absolute right-6 top-4 text-label-md text-primary-foreground drop-shadow-md hover:opacity-75">
           Skip

@@ -59,7 +59,7 @@ export function ProductCard({ p, className }: { p: ProductWithUrls; className?: 
 export function ProductGrid({ products, empty }: { products: ProductWithUrls[]; empty: string }) {
   if (!products.length) return <p className="py-10 text-center text-sm text-muted-foreground">{empty}</p>;
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-5">
       {products.map((p) => (
         <ProductCard key={p.id} p={p} />
       ))}

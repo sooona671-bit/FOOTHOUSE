@@ -6,10 +6,12 @@ import { BottomNav } from "./StoreLayout";
 export function SubPage({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="animate-screen flex min-h-full flex-1 flex-col bg-background">
-      <div className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 backdrop-blur-md">
-        <ScreenHeader title={title} />
+      <div className="sticky top-0 z-30 border-b border-border bg-background/80 px-5 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-md">
+        <div className="lg:mx-auto lg:w-full lg:max-w-2xl">
+          <ScreenHeader title={title} />
+        </div>
       </div>
-      <main className="flex-1 px-5 pb-8 pt-5">{children}</main>
+      <main className="flex-1 px-5 pb-8 pt-5 lg:mx-auto lg:w-full lg:max-w-2xl">{children}</main>
       <BottomNav />
     </div>
   );

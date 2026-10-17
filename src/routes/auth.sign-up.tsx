@@ -61,7 +61,7 @@ function SignUp() {
 
   if (sentTo) {
     return (
-      <Screen className="items-center justify-center bg-background px-7 text-center">
+      <Screen className="items-center justify-center bg-background px-7 text-center lg:mx-auto lg:max-w-md">
         <div className="mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
           <Icon name="mark_email_read" className="text-[44px]" />
         </div>
@@ -75,7 +75,7 @@ function SignUp() {
   }
 
   return (
-    <Screen className="justify-between bg-background px-7 py-3">
+    <Screen className="justify-between bg-background px-7 py-3 lg:mx-auto lg:max-w-md">
       <ScreenHeader brand onBack={() => navigate({ to: "/auth" })} />
       <div className="my-5">
         <h2 className="text-display text-foreground">Create Your Account</h2>

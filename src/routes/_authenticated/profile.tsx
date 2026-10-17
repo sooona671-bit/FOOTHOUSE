@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { memberId, profileQuery } from "@/lib/profile";
 import { toast } from "sonner";
+import { AvatarPicker } from "@/components/fh/AvatarPicker";
 import { Icon } from "@/components/fh/primitives";
 import { StorePage } from "@/components/fh/StoreLayout";
 import { whatsappNumber } from "@/lib/whatsapp";
@@ -55,12 +56,14 @@ function Profile() {
 
   return (
     <StorePage header={false}>
-      <div className="px-5 pb-6 pt-6">
+      <div className="px-5 pb-6 pt-6 lg:mx-auto lg:w-full lg:max-w-2xl">
         <h1 className="mb-6 text-headline-lg text-foreground">Profile</h1>
         <div className="mb-6 flex items-center gap-4 rounded-3xl bg-surface p-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-            {(profile?.full_name || user?.email || "?").charAt(0).toUpperCase()}
-          </div>
+          <AvatarPicker
+            userId={user?.id ?? ""}
+            initial={(profile?.full_name || user?.email || "?").charAt(0).toUpperCase()}
+            className="h-16 w-16"
+          />
           <div className="min-w-0">
             <p className="truncate text-label-lg text-foreground">{profile?.full_name || "FOOT HOUSE Member"}</p>
             <p className="truncate text-xs text-muted-foreground">{user?.email}</p>

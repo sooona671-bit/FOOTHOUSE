@@ -52,7 +52,7 @@ function ResetPassword() {
   };
 
   return (
-    <Screen className="relative justify-between bg-background px-7 py-3">
+    <Screen className="relative justify-between bg-background px-7 py-3 lg:mx-auto lg:max-w-md">
       <ScreenHeader title="Create New Password" onBack={() => navigate({ to: "/" })} />
       <div className="my-auto flex flex-col items-center py-2">
         <div className="mb-4 flex h-28 w-28 items-center justify-center rounded-full border border-surface-high bg-surface">

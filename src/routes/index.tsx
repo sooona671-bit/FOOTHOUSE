@@ -60,7 +60,7 @@ function Splash() {
     navigate({ to: resolveEntry({ hasSession: false, profileCompleted: false, onboardingSeen: onboarding.seen() }) });
 
   return (
-    <section className="relative flex min-h-full flex-1 flex-col items-center justify-between overflow-hidden bg-background px-8 py-10 text-center text-foreground">
+    <section className="relative flex min-h-full flex-1 flex-col items-center justify-between overflow-hidden bg-background px-8 py-10 text-center text-foreground lg:mx-auto lg:w-full lg:max-w-md">
       <div className="flex w-full justify-end pt-2">
         <span className="text-caption uppercase tracking-widest text-muted-foreground">SS/25 Editions</span>
       </div>

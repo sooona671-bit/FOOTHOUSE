@@ -12,7 +12,9 @@ export const Route = createFileRoute("/_authenticated/notifications")({
   }),
   component: () => (
     <StorePage>
-      <ComingSoon icon="notifications" title="Notifications" text="You have no notifications yet. Drop alerts and order updates will appear here." />
+      <div className="lg:mx-auto lg:w-full lg:max-w-2xl">
+        <ComingSoon icon="notifications" title="Notifications" text="You have no notifications yet. Drop alerts and order updates will appear here." />
+      </div>
     </StorePage>
   ),
 });

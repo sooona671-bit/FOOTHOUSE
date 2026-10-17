@@ -34,7 +34,7 @@ function Home() {
           <Icon name="tune" className="text-[18px] text-outline" />
         </Link>
 
-        <div className="relative overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm">
+        <div className="relative overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm lg:aspect-[21/9] lg:rounded-3xl">
           <img
             src={heroImage}
             alt="New season drop"
@@ -43,7 +43,7 @@ function Home() {
             loading="eager"
             decoding="async"
             fetchPriority="high"
-            className="h-48 w-full object-cover object-top opacity-75"
+            className="h-48 w-full object-cover object-top opacity-75 lg:h-full"
           />
           <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-5">
             <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">Edition 01 • Spring 2025</span>
@@ -60,7 +60,7 @@ function Home() {
             <h3 className="text-headline-sm text-foreground">Departments</h3>
             <Link to="/categories" className="text-xs text-outline">See All</Link>
           </div>
-          <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
+          <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-nowrap lg:overflow-visible lg:px-0">
             {departments.map((d) => (
               <button
                 key={d}
@@ -84,12 +84,12 @@ function Home() {
             </div>
             <Link to="/search" search={dept === departments[0] ? {} : { category: dept }} className="text-xs text-outline">View All</Link>
           </div>
-          <div className="hide-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+          <div className="hide-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0 xl:grid-cols-5">
             {isLoading && <p className="text-xs text-outline">Loading…</p>}
             {error && <p className="text-xs text-destructive">Couldn't load products. Please try again.</p>}
             {!isLoading && !error && shown.length === 0 && <p className="text-xs text-outline">New styles are coming soon.</p>}
             {shown.map((p) => (
-              <ProductCard key={p.id} p={p} className="w-[46%] min-w-[160px] shrink-0" />
+              <ProductCard key={p.id} p={p} className="w-[46%] min-w-[160px] shrink-0 lg:w-auto lg:min-w-0" />
             ))}
           </div>
         </section>

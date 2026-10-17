@@ -2,7 +2,8 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { withImageUrls } from "./products";
+import { withImageUrls, type ProductWithUrls } from "./products";
+import type { Tables } from "@/integrations/supabase/types";
 
 /** Prices are shown in Nepali rupees. */
 export const npr = (n: number) => `NPR ${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -70,15 +71,29 @@ export function useWishlist() {
     },
     onSuccess: (added) => {
       toast.success(added ? "Saved to wishlist" : "Removed from wishlist");
-      qc.invalidateQueries({ queryKey: wishKey(user?.id) });
     },
-    onError: (e: Error) => toast.error(e.message || "Couldn't update wishlist"),
+    onMutate: async (productId) => {
+      const key = wishKey(user?.id);
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<string[]>(key);
+      if (user) {
+        qc.setQueryData<string[]>(key, (old = []) => old.includes(productId) ? old.filter((id) => id !== productId) : [...old, productId]);
+      }
+      return { previous };
+    },
+    onError: (e: Error, _productId, context) => {
+      qc.setQueryData(wishKey(user?.id), context?.previous);
+      toast.error(e.message || "Couldn't update wishlist");
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: wishKey(user?.id) }),
   });
   return { ids, has: (id: string) => ids.includes(id), toggle: (id: string) => toggle.mutate(id), isLoading: query.isLoading };
 }
 
 /* ---------------- Cart ---------------- */
 const cartKey = (uid?: string) => ["cart", uid ?? "anon"];
+
+type CartItem = Tables<"cart_items"> & { product: ProductWithUrls };
 
 export function useCart() {
   const { user } = useAuth();
@@ -100,7 +115,7 @@ export function useCart() {
   const add = useMutation({
     mutationFn: async (v: { productId: string; size: string; color: string; quantity?: number }) => {
       if (!user) throw new Error("Please sign in first.");
-      const existing = (query.data ?? []).find((i) => i.product_id === v.productId && i.size === v.size && i.color === v.color);
+      const existing = (qc.getQueryData<CartItem[]>(cartKey(user.id)) ?? query.data ?? []).find((i) => i.product_id === v.productId && i.size === v.size && i.color === v.color);
       if (existing) {
         const { error } = await supabase.from("cart_items").update({ quantity: Math.min(20, existing.quantity + (v.quantity ?? 1)) }).eq("id", existing.id);
         if (error) throw error;
@@ -113,17 +128,57 @@ export function useCart() {
     },
     onSuccess: () => {
       toast.success("Added to bag");
-      done();
     },
-    onError,
+    onMutate: async (v) => {
+      const key = cartKey(user?.id);
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<CartItem[]>(key);
+      if (!user) return { previous };
+      const current = previous ?? [];
+      const existing = current.find((i) => i.product_id === v.productId && i.size === v.size && i.color === v.color);
+      if (existing) {
+        qc.setQueryData<CartItem[]>(key, current.map((i) => i.id === existing.id ? { ...i, quantity: Math.min(20, i.quantity + (v.quantity ?? 1)) } : i));
+      } else {
+        const product = qc.getQueryData<ProductWithUrls[]>(["products", "published"])?.find((p) => p.id === v.productId)
+          ?? qc.getQueryData<ProductWithUrls | null>(["products", "detail", v.productId]) ?? null;
+        if (product) {
+          qc.setQueryData<CartItem[]>(key, [...current, {
+            id: `optimistic-${crypto.randomUUID()}`,
+            created_at: new Date().toISOString(),
+            user_id: user.id,
+            product_id: v.productId,
+            size: v.size,
+            color: v.color,
+            quantity: v.quantity ?? 1,
+            product,
+          }]);
+        }
+      }
+      return { previous };
+    },
+    onError: (e, _v, context) => {
+      qc.setQueryData(cartKey(user?.id), context?.previous);
+      onError(e);
+    },
+    onSettled: done,
   });
   const setQty = useMutation({
     mutationFn: async (v: { id: string; quantity: number }) => {
       const { error } = await supabase.from("cart_items").update({ quantity: v.quantity }).eq("id", v.id);
       if (error) throw error;
     },
-    onSuccess: done,
-    onError,
+    onMutate: async (v) => {
+      const key = cartKey(user?.id);
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<CartItem[]>(key);
+      qc.setQueryData<CartItem[]>(key, (old = []) => old.map((i) => i.id === v.id ? { ...i, quantity: v.quantity } : i));
+      return { previous };
+    },
+    onError: (e, _v, context) => {
+      qc.setQueryData(cartKey(user?.id), context?.previous);
+      onError(e);
+    },
+    onSettled: done,
   });
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -132,9 +187,19 @@ export function useCart() {
     },
     onSuccess: () => {
       toast.success("Removed from bag");
-      done();
     },
-    onError,
+    onMutate: async (id) => {
+      const key = cartKey(user?.id);
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<CartItem[]>(key);
+      qc.setQueryData<CartItem[]>(key, (old = []) => old.filter((i) => i.id !== id));
+      return { previous };
+    },
+    onError: (e, _id, context) => {
+      qc.setQueryData(cartKey(user?.id), context?.previous);
+      onError(e);
+    },
+    onSettled: done,
   });
   const items = query.data ?? [];
   return {

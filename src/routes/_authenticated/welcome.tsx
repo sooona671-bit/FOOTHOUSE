@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/welcome")({
 function Welcome() {
   const { user } = useAuth();
   return (
-    <Screen className="relative items-center justify-between overflow-hidden bg-background px-7 py-6 text-center">
+    <Screen className="relative items-center justify-between overflow-hidden bg-background px-7 py-6 text-center lg:mx-auto lg:w-full lg:max-w-md">
       <div className="absolute left-8 top-10 font-mono text-xs opacity-20">✦ 2025 COLLECTION</div>
       <div className="absolute right-8 top-16 font-mono text-xs opacity-20">EDITION 01 ✦</div>
       <span className="pt-2 text-caption font-bold uppercase tracking-[0.25em] text-muted-foreground">Registration Complete</span>

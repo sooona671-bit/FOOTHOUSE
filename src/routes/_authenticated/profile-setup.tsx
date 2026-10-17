@@ -2,9 +2,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AvatarPicker } from "@/components/fh/AvatarPicker";
 import { useAuth } from "@/hooks/use-auth";
 import { profileQuery, saveProfile } from "@/lib/profile";
-import { FhButton, Field, Icon, Screen, ScreenHeader } from "@/components/fh/primitives";
+import { FhButton, Field, Screen, ScreenHeader } from "@/components/fh/primitives";
 
 export const Route = createFileRoute("/_authenticated/profile-setup")({
   head: () => ({
@@ -63,7 +64,7 @@ function ProfileSetup() {
   };
 
   return (
-    <Screen className="justify-between bg-background px-7 py-3">
+    <Screen className="justify-between bg-background px-7 py-3 lg:mx-auto lg:w-full lg:max-w-2xl">
       <ScreenHeader
         title="Fill Your Profile"
         onBack={() => navigate({ to: profile?.profile_completed ? "/profile" : "/" })}
@@ -74,14 +75,11 @@ function ProfileSetup() {
         }
       />
       <div className="mb-3 mt-2 flex justify-center">
-        <div className="relative h-24 w-24">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-surface-high bg-surface">
-            <Icon name="account_circle" className="text-[54px] text-outline" />
-          </div>
-          <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md" title="Photo upload coming soon">
-            <Icon name="edit" className="text-[16px]" />
-          </span>
-        </div>
+        <AvatarPicker
+          userId={user?.id ?? ""}
+          initial={(profile?.full_name || user?.email || "?").charAt(0).toUpperCase()}
+          className="h-24 w-24"
+        />
       </div>
       <form id="profile-form" onSubmit={submit} className="my-auto space-y-3.5">
         <Field placeholder="Full Name" required autoComplete="name" value={form.full_name} onChange={set("full_name")} className="font-semibold" />

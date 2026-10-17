@@ -3,13 +3,14 @@ import { toast } from "sonner";
 import { FhButton, Icon } from "@/components/fh/primitives";
 
 /** Size (px) of the square photo that gets saved. */
-const OUTPUT = 1200;
 const MAX_ZOOM = 3;
 
 type Props = {
   file: File;
   onDone: (cropped: File) => void;
   onCancel: () => void;
+  outputSize?: number;
+  round?: boolean;
 };
 
 /**
@@ -17,7 +18,7 @@ type Props = {
  * see in the store. Drag to move, use the slider to zoom.
  * Zooming all the way out fits the whole photo and fills the extra space with white.
  */
-export function ImageCropper({ file, onDone, onCancel }: Props) {
+export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round = false }: Props) {
   const [url, setUrl] = useState<string | null>(null);
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -106,8 +107,8 @@ export function ImageCropper({ file, onDone, onCancel }: Props) {
     if (!img || !nat) return;
     setBusy(true);
     const canvas = document.createElement("canvas");
-    canvas.width = OUTPUT;
-    canvas.height = OUTPUT;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       setBusy(false);
@@ -115,12 +116,12 @@ export function ImageCropper({ file, onDone, onCancel }: Props) {
       return;
     }
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, OUTPUT, OUTPUT);
+    ctx.fillRect(0, 0, outputSize, outputSize);
     ctx.imageSmoothingQuality = "high";
-    const k = OUTPUT / frame;
+    const k = outputSize / frame;
     const dw = nat.w * scale * k;
     const dh = nat.h * scale * k;
-    ctx.drawImage(img, OUTPUT / 2 + eff.x * k - dw / 2, OUTPUT / 2 + eff.y * k - dh / 2, dw, dh);
+    ctx.drawImage(img, outputSize / 2 + eff.x * k - dw / 2, outputSize / 2 + eff.y * k - dh / 2, dw, dh);
     canvas.toBlob(
       (blob) => {
         setBusy(false);
@@ -174,6 +175,7 @@ export function ImageCropper({ file, onDone, onCancel }: Props) {
               ref={imgRef}
               src={url}
               alt="Photo to crop"
+              decoding="async"
               draggable={false}
               onLoad={onLoad}
               onError={() => {
@@ -199,6 +201,7 @@ export function ImageCropper({ file, onDone, onCancel }: Props) {
             <div className="absolute left-2/3 top-0 h-full w-px bg-black/15" />
             <div className="absolute left-0 top-1/3 h-px w-full bg-black/15" />
             <div className="absolute left-0 top-2/3 h-px w-full bg-black/15" />
+            {round && <div className="absolute inset-0 rounded-full border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />}
           </div>
           {loading && (
             <p className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">

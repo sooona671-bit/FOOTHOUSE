@@ -22,7 +22,7 @@ function Categories() {
     <StorePage>
       <div className="px-5 pb-6 pt-4">
         <h1 className="mb-4 text-headline-lg text-foreground">Categories</h1>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-5">
           <Tile label="All Drops" count={products.length} img={products[0]?.imageUrls[0]} />
           {CATEGORIES.map((c) => {
             const list = products.filter((p) => p.category === c);
