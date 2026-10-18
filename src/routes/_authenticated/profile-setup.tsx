@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AvatarPicker } from "@/components/fh/AvatarPicker";
 import { useAuth } from "@/hooks/use-auth";
 import { profileQuery, saveProfile } from "@/lib/profile";
+import { consumeReturnTo } from "@/lib/guest";
 import { FhButton, Field, Screen, ScreenHeader } from "@/components/fh/primitives";
 
 export const Route = createFileRoute("/_authenticated/profile-setup")({
@@ -50,7 +51,7 @@ function ProfileSetup() {
         profile_completed: true,
       });
       await queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
-      navigate({ to: profile?.profile_completed ? "/profile" : "/welcome", replace: true });
+      navigate({ to: consumeReturnTo() ?? (profile?.profile_completed ? "/profile" : "/welcome"), replace: true });
     } catch {
       toast.error("Couldn't save your profile. Please try again.");
       setBusy(false);

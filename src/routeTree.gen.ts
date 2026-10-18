@@ -32,6 +32,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdRouteImport } from './routes/admin.$id'
 import { Route as AdminBannerRouteImport } from './routes/admin.banner'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminForgotRouteImport } from './routes/admin_.forgot'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin_.reset-password'
@@ -158,6 +159,11 @@ const AdminNewRoute = AdminNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminForgotRoute = AdminForgotRouteImport.update({
   id: '/admin_/forgot',
   path: '/admin/forgot',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/forgot': typeof AdminForgotRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByTo {
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/forgot': typeof AdminForgotRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
   '/admin/new': typeof AdminNewRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin_/forgot': typeof AdminForgotRoute
   '/admin_/login': typeof AdminLoginRoute
   '/admin_/reset-password': typeof AdminResetPasswordRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/admin/banner'
     | '/admin/new'
+    | '/admin/notifications'
     | '/admin/forgot'
     | '/admin/login'
     | '/admin/reset-password'
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/admin/banner'
     | '/admin/new'
+    | '/admin/notifications'
     | '/admin/forgot'
     | '/admin/login'
     | '/admin/reset-password'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/admin/banner'
     | '/admin/new'
+    | '/admin/notifications'
     | '/admin_/forgot'
     | '/admin_/login'
     | '/admin_/reset-password'
@@ -579,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNewRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin_/forgot': {
       id: '/admin_/forgot'
       path: '/admin/forgot'
@@ -688,6 +707,7 @@ interface AdminRouteChildren {
   AdminIdRoute: typeof AdminIdRoute
   AdminBannerRoute: typeof AdminBannerRoute
   AdminNewRoute: typeof AdminNewRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -695,6 +715,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminIdRoute: AdminIdRoute,
   AdminBannerRoute: AdminBannerRoute,
   AdminNewRoute: AdminNewRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

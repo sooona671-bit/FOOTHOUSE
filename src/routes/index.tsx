@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { onboarding, resolveEntry } from "@/lib/entry";
 import { profileQuery } from "@/lib/profile";
+import { routeAfterAuth } from "@/lib/after-auth";
 import { BRAND, FhButton, Icon, Monogram } from "@/components/fh/primitives";
 
 export const Route = createFileRoute("/")({
@@ -43,7 +44,7 @@ function Splash() {
         const p = await queryClient.fetchQuery(profileQuery(session.user.id));
         if (cancelled) return;
         navigate({
-          to: resolveEntry({ hasSession: true, profileCompleted: !!p?.profile_completed, onboardingSeen: true }),
+          to: p?.profile_completed ? await routeAfterAuth(queryClient, session.user.id) : resolveEntry({ hasSession: true, profileCompleted: false, onboardingSeen: true }),
           replace: true,
         });
       } catch {

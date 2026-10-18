@@ -154,6 +154,57 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          link: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          link?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          link?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_reads: {
+        Row: {
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string

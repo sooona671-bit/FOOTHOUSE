@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
+import { SignInPromptProvider } from "@/hooks/use-require-auth";
 import { PhoneShell } from "@/components/fh/PhoneShell";
 import { Toaster } from "@/components/ui/sonner";
 import { fhButton } from "@/components/fh/primitives";
@@ -119,12 +120,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {isAdmin ? <Outlet /> : (
-          <PhoneShell>
-            <Outlet />
-          </PhoneShell>
-        )}
-        <Toaster position="top-center" />
+        <SignInPromptProvider>
+          {isAdmin ? <Outlet /> : (
+            <PhoneShell>
+              <Outlet />
+            </PhoneShell>
+          )}
+          <Toaster position="top-center" />
+        </SignInPromptProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

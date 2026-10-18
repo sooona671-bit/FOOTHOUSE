@@ -2,10 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { ProductWithUrls } from "@/lib/products";
 import { npr, useWishlist } from "@/lib/shop";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { Icon } from "./primitives";
 
 export function ProductCard({ p, className }: { p: ProductWithUrls; className?: string }) {
   const wish = useWishlist();
+  const requireAuth = useRequireAuth();
   const saved = wish.has(p.id);
   return (
     <article className={cn("relative rounded-2xl border border-border bg-card p-2", className)}>
@@ -47,7 +49,7 @@ export function ProductCard({ p, className }: { p: ProductWithUrls; className?: 
       <button
         aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
         aria-pressed={saved}
-        onClick={() => wish.toggle(p.id)}
+        onClick={() => requireAuth(() => wish.toggle(p.id))}
         className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-background shadow-sm"
       >
         <Icon name="favorite" filled={saved} className="text-[18px]" />

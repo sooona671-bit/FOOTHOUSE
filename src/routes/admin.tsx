@@ -45,6 +45,7 @@ function AdminLayout() {
             <Link to="/admin" activeOptions={{ exact: true }} className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Products</Link>
             <Link to="/admin/new" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Add product</Link>
             <Link to="/admin/banner" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Home banner</Link>
+            <Link to="/admin/notifications" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Notifications</Link>
           </nav>
           <span className="ml-auto hidden text-xs opacity-70 sm:inline">{adminEmail}</span>
           <button onClick={signOut} className="flex items-center gap-1 rounded-full border border-primary-foreground/30 px-3 py-1.5 text-xs">

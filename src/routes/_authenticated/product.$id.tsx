@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { normalizeSizes } from "@/lib/products";
 import { useWhatsAppOrder } from "@/lib/whatsapp";
 import { FhButton, Icon, ScreenHeader } from "@/components/fh/primitives";
 import { BottomNav } from "@/components/fh/StoreLayout";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export const Route = createFileRoute("/_authenticated/product/$id")({
   head: () => ({
@@ -23,14 +24,27 @@ export const Route = createFileRoute("/_authenticated/product/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
   const { data: p, isLoading, error } = useQuery(productQuery(id));
   const cart = useCart();
   const wish = useWishlist();
+  const requireAuth = useRequireAuth();
   const order = useWhatsAppOrder();
   const [img, setImg] = useState(0);
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const scrollFrame = useRef<number | null>(null);
+  const drag = useRef<{ x: number; scrollLeft: number } | null>(null);
+
+  useEffect(() => {
+    setImg(0);
+    const frame = requestAnimationFrame(() => galleryRef.current?.scrollTo({ left: 0, behavior: "auto" }));
+    return () => cancelAnimationFrame(frame);
+  }, [id]);
+
+  useEffect(() => () => {
+    if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
+  }, []);
 
   if (isLoading) return <Shell><p className="py-24 text-center text-sm text-outline">Loading…</p></Shell>;
   if (error) return <Shell><p className="py-24 text-center text-sm text-destructive">Couldn't load this product. Please try again.</p></Shell>;
@@ -53,42 +67,124 @@ function ProductPage() {
     return true;
   };
   const addToBag = async () => {
+    if (!requireAuth()) return;
     if (!pickOk()) return;
     await cart.add({ productId: p.id, size, color });
   };
   const buyNow = async () => {
+    if (!requireAuth()) return;
     if (!pickOk()) return;
     await order.send([{ productId: p.id, name: p.name, price: Number(p.price), size, color, quantity: 1, imagePath: p.images[0] }]);
   };
 
+  const galleryImages: (string | null)[] = p.imageUrls.length ? p.imageUrls : [null];
+  const goTo = (index: number, behavior: ScrollBehavior = "smooth") => {
+    const next = Math.max(0, Math.min(galleryImages.length - 1, index));
+    setImg(next);
+    galleryRef.current?.scrollTo({ left: next * galleryRef.current.clientWidth, behavior });
+  };
+  const onGalleryScroll = () => {
+    if (scrollFrame.current !== null) return;
+    scrollFrame.current = requestAnimationFrame(() => {
+      const gallery = galleryRef.current;
+      if (gallery?.clientWidth) setImg(Math.max(0, Math.min(galleryImages.length - 1, Math.round(gallery.scrollLeft / gallery.clientWidth))));
+      scrollFrame.current = null;
+    });
+  };
+  const onGalleryKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goTo(img - 1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goTo(img + 1);
+    }
+  };
+  const onGalleryPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, scrollLeft: e.currentTarget.scrollLeft };
+  };
+  const onGalleryPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return;
+    e.currentTarget.scrollLeft = drag.current.scrollLeft - (e.clientX - drag.current.x);
+  };
+  const endGalleryDrag = () => {
+    drag.current = null;
+  };
+
   return (
     <Shell right={
-      <button aria-label="Wishlist" onClick={() => wish.toggle(p.id)} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface">
+      <button aria-label="Wishlist" onClick={() => requireAuth(() => wish.toggle(p.id))} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface">
         <Icon name="favorite" filled={wish.has(p.id)} className="text-[22px]" />
       </button>
     }>
       <div className="lg:grid lg:grid-cols-2 lg:gap-10">
         <div>
-          <div className="aspect-square overflow-hidden rounded-3xl bg-surface">
-            {p.imageUrls[img] ? (
-              <img
-                src={p.imageUrls[img]}
-                alt={p.name}
-                width={800}
-                height={800}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-outline"><Icon name="hide_image" className="text-[40px]" /></div>
+          <div className="relative">
+            <div
+              ref={galleryRef}
+              tabIndex={0}
+              role="region"
+              aria-label="Product photos"
+              className="hide-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth rounded-3xl bg-surface outline-none lg:cursor-grab lg:active:cursor-grabbing"
+              onScroll={onGalleryScroll}
+              onKeyDown={onGalleryKeyDown}
+              onPointerDown={onGalleryPointerDown}
+              onPointerMove={onGalleryPointerMove}
+              onPointerUp={endGalleryDrag}
+              onPointerCancel={endGalleryDrag}
+            >
+              {galleryImages.map((url, i) => (
+                <div key={url ?? "empty-image"} className="aspect-square w-full shrink-0 snap-center overflow-hidden rounded-3xl bg-surface">
+                  {url ? (
+                    <img
+                      src={url}
+                      alt={`${p.name} photo ${i + 1}`}
+                      width={800}
+                      height={800}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      fetchPriority={i === 0 ? "high" : undefined}
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-outline"><Icon name="hide_image" className="text-[40px]" /></div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {galleryImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous photo"
+                  onClick={() => goTo(img - 1)}
+                  className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm lg:flex"
+                >
+                  <Icon name="chevron_left" className="text-[22px]" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next photo"
+                  onClick={() => goTo(img + 1)}
+                  className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm lg:flex"
+                >
+                  <Icon name="chevron_right" className="text-[22px]" />
+                </button>
+                <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 lg:bottom-4">
+                  {galleryImages.map((_, i) => (
+                    <span key={i} className={cn("h-1.5 w-1.5 rounded-full", i === img ? "bg-primary" : "bg-background/80")} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
           {p.imageUrls.length > 1 && (
             <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
               {p.imageUrls.map((u, i) => (
-                <button key={u} onClick={() => setImg(i)} className={cn("h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2", i === img ? "border-primary" : "border-transparent")}>
+                <button key={u} onClick={() => goTo(i)} className={cn("h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2", i === img ? "border-primary" : "border-transparent")}>
                   <img
                     src={u}
                     alt=""
@@ -132,15 +228,10 @@ function ProductPage() {
               <Icon name="chat" className="text-[20px]" />
               {soldOut ? "Sold Out" : order.sending ? "Opening WhatsApp…" : "Buy Now on WhatsApp"}
             </FhButton>
-            <div className="flex gap-3">
-              <FhButton variant="outline" disabled={soldOut || cart.adding} onClick={addToBag}>
-                <Icon name="shopping_bag" className="text-[20px]" />
-                {cart.adding ? "Adding…" : "Add to Bag"}
-              </FhButton>
-              <FhButton variant="outline" size="icon" aria-label="Open bag" onClick={() => navigate({ to: "/bag" })}>
-                <Icon name="shopping_bag" className="text-[20px]" />
-              </FhButton>
-            </div>
+            <FhButton variant="outline" className="w-full" disabled={soldOut || cart.adding} onClick={addToBag}>
+              <Icon name="shopping_bag" className="text-[20px]" />
+              {cart.adding ? "Adding…" : "Add to Bag"}
+            </FhButton>
           </div>
         </div>
       </div>
