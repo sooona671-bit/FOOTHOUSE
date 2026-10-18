@@ -1,7 +1,7 @@
 const RETURN_TO_KEY = "fh_return_to";
 
 export function isPublicPath(pathname: string) {
-  return pathname === "/home" || pathname === "/categories" || pathname === "/search" || pathname.startsWith("/product/") || pathname.startsWith("/info/");
+  return pathname === "/home" || pathname === "/search" || pathname.startsWith("/product/") || pathname.startsWith("/info/");
 }
 
 export function setReturnTo(path: string) {

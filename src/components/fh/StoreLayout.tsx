@@ -8,7 +8,6 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 
 const tabs = [
   { to: "/home", label: "Home", icon: "storefront" },
-  { to: "/categories", label: "Categories", icon: "grid_view" },
   { to: "/wishlist", label: "Wishlist", icon: "favorite" },
   { to: "/bag", label: "Bag", icon: "shopping_bag" },
   { to: "/profile", label: "Profile", icon: "person" },
@@ -20,7 +19,7 @@ export function BottomNav() {
   const { user } = useAuth();
   const requireAuth = useRequireAuth();
   return (
-    <nav className="sticky bottom-0 z-30 mt-auto grid grid-cols-5 border-t border-border bg-background/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-md lg:hidden">
+    <nav className="sticky bottom-0 z-30 mt-auto grid grid-cols-4 border-t border-border bg-background/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-md lg:hidden">
       {tabs.map((t) => (
         <Link
           key={t.to}

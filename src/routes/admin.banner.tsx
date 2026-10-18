@@ -12,6 +12,7 @@ import {
   deleteBannerImage,
   saveBanner,
   uploadBannerImage,
+  normalizeBannerLink,
   type BannerLink,
   type HomeBanner,
 } from "@/lib/banner";
@@ -47,7 +48,7 @@ const formFrom = (banner: typeof BANNER_DEFAULTS | HomeBanner): BannerForm => ({
   title: banner.title,
   subtitle: banner.subtitle,
   button_text: banner.button_text,
-  button_link: banner.button_link as BannerLink,
+  button_link: normalizeBannerLink(banner.button_link),
 });
 
 function AdminBanner() {
@@ -203,7 +204,6 @@ function AdminBanner() {
             <label className={label}>Button goes to</label>
             <select className={input} value={form.button_link} onChange={(e) => update("button_link", e.target.value)}>
               <option value="/search">Search</option>
-              <option value="/categories">Categories</option>
               <option value="/wishlist">Wishlist</option>
               <option value="/home">Home</option>
             </select>

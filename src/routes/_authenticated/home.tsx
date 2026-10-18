@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { departments, heroImage } from "@/data/sample-catalog";
-import { bannerImageUrl, bannerQuery, BANNER_DEFAULTS } from "@/lib/banner";
+import { bannerImageUrl, bannerQuery, BANNER_DEFAULTS, normalizeBannerLink } from "@/lib/banner";
 import { publishedProductsQuery } from "@/lib/products";
 import { Icon } from "@/components/fh/primitives";
 import { ProductCard } from "@/components/fh/ProductCard";
@@ -52,7 +52,7 @@ function Home() {
             {banner.eyebrow && <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{banner.eyebrow}</span>}
             {banner.title && <h2 className="text-headline-md">{banner.title}</h2>}
             {banner.subtitle && <p className="text-xs text-primary-foreground/80">{banner.subtitle}</p>}
-            {banner.button_text && <Link to={banner.button_link as "/search" | "/categories" | "/wishlist" | "/home"} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">
+            {banner.button_text && <Link to={normalizeBannerLink(banner.button_link)} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">
               {banner.button_text} <Icon name="arrow_forward" className="text-[16px]" />
             </Link>}
           </div>
@@ -61,7 +61,6 @@ function Home() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-headline-sm text-foreground">Departments</h3>
-            <Link to="/categories" className="text-xs text-outline">See All</Link>
           </div>
           <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-nowrap lg:overflow-visible lg:px-0">
             {departments.map((d) => (

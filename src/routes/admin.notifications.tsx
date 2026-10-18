@@ -22,6 +22,7 @@ import {
   sendNotification,
   stopNotification,
   updateNotification,
+  normalizeNotificationLink,
   type Notification,
   type NotificationDays,
   type NotificationLink,
@@ -41,7 +42,6 @@ const textarea = "min-h-28 w-full resize-y rounded-xl bg-surface px-4 py-3 text-
 const links: { value: NotificationLink | ""; label: string }[] = [
   { value: "", label: "None" },
   { value: "/search", label: "Search" },
-  { value: "/categories", label: "Categories" },
   { value: "/wishlist", label: "Wishlist" },
   { value: "/home", label: "Home" },
   { value: "/bag", label: "Bag" },
@@ -107,7 +107,7 @@ function AdminNotifications() {
     setEditing(notification.id);
     setEditTitle(notification.title);
     setEditBody(notification.body);
-    setEditLink((notification.link as NotificationLink | null) ?? "");
+    setEditLink(normalizeNotificationLink(notification.link) ?? "");
     setEditExpiry("keep");
   };
 

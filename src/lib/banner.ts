@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 
 export type HomeBanner = Tables<"home_banner">;
-export type BannerLink = "/search" | "/categories" | "/wishlist" | "/home";
+export type BannerLink = "/search" | "/wishlist" | "/home";
 export type BannerUpdate = Omit<TablesUpdate<"home_banner">, "id" | "updated_at"> & { button_link: BannerLink };
 
 export const BANNER_DEFAULTS = {
@@ -13,6 +13,11 @@ export const BANNER_DEFAULTS = {
   button_text: "Shop Drop",
   button_link: "/search" as BannerLink,
 } as const;
+
+export function normalizeBannerLink(link: string | null | undefined): BannerLink {
+  if (link === "/search" || link === "/wishlist" || link === "/home") return link;
+  return "/home";
+}
 
 export const bannerQuery = queryOptions({
   queryKey: ["home-banner"],

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FhButton, Icon } from "@/components/fh/primitives";
 import { StorePage } from "@/components/fh/StoreLayout";
-import { useNotifications, type NotificationLink } from "@/lib/notifications";
+import { normalizeNotificationLink, useNotifications } from "@/lib/notifications";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
@@ -33,7 +33,8 @@ function Notifications() {
 
   const openNotification = (id: string, link: string | null) => {
     markRead(id);
-    if (link) navigate({ to: link as NotificationLink });
+    const target = normalizeNotificationLink(link);
+    if (target) navigate({ to: target });
   };
 
   return (

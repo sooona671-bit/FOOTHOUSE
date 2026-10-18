@@ -7,8 +7,15 @@ import { useAuth } from "@/hooks/use-auth";
 
 export type Notification = Tables<"notifications">;
 export type NotificationRead = Tables<"notification_reads">;
-export type NotificationLink = "/search" | "/categories" | "/wishlist" | "/home" | "/bag";
+export type NotificationLink = "/search" | "/wishlist" | "/home" | "/bag";
 export type NotificationDays = 1 | 3 | 7 | 30 | null;
+
+export function normalizeNotificationLink(link: string | null | undefined): NotificationLink | null {
+  if (!link) return null;
+  if (link === "/categories") return "/home";
+  if (link === "/search" || link === "/wishlist" || link === "/home" || link === "/bag") return link;
+  return null;
+}
 
 const userNotificationsKey = (userId?: string) => ["notifications", "user", userId ?? "anon"] as const;
 const readIdsKey = (userId?: string) => ["notification-reads", userId ?? "anon"] as const;
