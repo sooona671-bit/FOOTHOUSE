@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { profileQuery } from "@/lib/profile";
-import { PRODUCT_BUCKET } from "@/lib/products";
 import { npr } from "@/lib/shop";
 
 export type OrderLine = {
@@ -18,32 +17,24 @@ export type OrderLine = {
   imagePath?: string | undefined;
 };
 
-type Customer = { name?: string | null; phone?: string | null; email?: string | null; address?: string | null };
-
-const SEVEN_DAYS = 60 * 60 * 24 * 7;
+type Customer = {
+  name?: string | null | undefined;
+  phone?: string | null | undefined;
+  email?: string | null | undefined;
+  address?: string | null | undefined;
+};
 
 /** Store owner's WhatsApp number: digits only, with country code (set VITE_WHATSAPP_NUMBER in .env). */
-export const whatsappNumber = () => String(import.meta.env.VITE_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+export const whatsappNumber = () => String(import.meta.env["VITE_WHATSAPP_NUMBER"] ?? "").replace(/\D/g, "");
 
 export async function buildOrderMessage(lines: OrderLine[], customer: Customer) {
-  // Photos live in a private bucket, so each photo link is a signed link valid for 7 days.
-  const paths = Array.from(new Set(lines.map((l) => l.imagePath).filter(Boolean) as string[]));
-  const photo = new Map<string, string>();
-  if (paths.length) {
-    const { data } = await supabase.storage.from(PRODUCT_BUCKET).createSignedUrls(paths, SEVEN_DAYS);
-    data?.forEach((d) => d.path && d.signedUrl && photo.set(d.path, d.signedUrl));
-  }
   const origin = window.location.origin;
   const many = lines.length > 1;
   const blocks = lines.map((l, i) =>
     [
       `${many ? `${i + 1}. ` : ""}*${l.name}*`,
-      `Price: ${npr(l.price)}`,
-      l.size && `Size: ${l.size}`,
-      l.color && `Colour: ${l.color}`,
-      `Qty: ${l.quantity}`,
-      `Link: ${origin}/product/${l.productId}`,
-      l.imagePath && photo.get(l.imagePath) && `Photo: ${photo.get(l.imagePath)}`,
+      [l.size && `Size ${l.size}`, l.color, `Qty ${l.quantity}`, npr(l.price)].filter(Boolean).join(" • "),
+      `${origin}/p/${l.productId}`,
     ]
       .filter(Boolean)
       .join("\n"),

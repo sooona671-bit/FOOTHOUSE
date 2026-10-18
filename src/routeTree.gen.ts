@@ -40,6 +40,7 @@ import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/auth.sign-up'
+import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as AuthenticatedInfoSlugRouteImport } from './routes/_authenticated/info.$slug'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
 
@@ -199,6 +200,11 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => AuthRoute,
 } as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInfoSlugRoute = AuthenticatedInfoSlugRouteImport.update({
   id: '/info/$slug',
   path: '/info/$slug',
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/p/$id': typeof PIdRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/info/$slug': typeof AuthenticatedInfoSlugRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/p/$id': typeof PIdRoute
   '/admin': typeof AdminIndexRoute
   '/auth': typeof AuthIndexRoute
   '/info/$slug': typeof AuthenticatedInfoSlugRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/auth/forgot': typeof AuthForgotRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/p/$id': typeof PIdRoute
   '/admin/': typeof AdminIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/_authenticated/info/$slug': typeof AuthenticatedInfoSlugRoute
@@ -343,6 +352,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/p/$id'
     | '/admin/'
     | '/auth/'
     | '/info/$slug'
@@ -375,6 +385,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/p/$id'
     | '/admin'
     | '/auth'
     | '/info/$slug'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/auth/forgot'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/p/$id'
     | '/admin/'
     | '/auth/'
     | '/_authenticated/info/$slug'
@@ -426,6 +438,7 @@ export interface RootRouteChildren {
   AdminForgotRoute: typeof AdminForgotRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  PIdRoute: typeof PIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -647,6 +660,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/info/$slug': {
       id: '/_authenticated/info/$slug'
       path: '/info/$slug'
@@ -747,6 +767,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminForgotRoute: AdminForgotRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  PIdRoute: PIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
