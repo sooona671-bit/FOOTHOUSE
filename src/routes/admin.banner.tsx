@@ -1,227 +1,64 @@
-import { useEffect, useRef, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { heroImage } from "@/data/sample-catalog";
 import { ImageCropper } from "@/components/fh/ImageCropper";
+import { HeroSlide } from "@/components/fh/HeroCarousel";
 import { FhButton, Icon } from "@/components/fh/primitives";
-import {
-  BANNER_DEFAULTS,
-  bannerImageUrl,
-  bannerQuery,
-  deleteBannerImage,
-  saveBanner,
-  uploadBannerImage,
-  normalizeBannerLink,
-  type BannerLink,
-  type HomeBanner,
-} from "@/lib/banner";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { publishedProductsQuery } from "@/lib/products";
+import { adminBannersQuery, createBanner, DEFAULT_BANNER, deleteBanner, deleteBannerImage, MAX_BANNERS, toggleActive, updateBanner, uploadBannerImage, useMoveBanner, type BannerInsert, type BannerOverlay, type BannerTextAlign, type BannerTextColor, type HomeBanner } from "@/lib/banner";
 
 export const Route = createFileRoute("/admin/banner")({
-  head: () => ({
-    meta: [
-      { title: "Home Banner | FOOT HOUSE Admin" },
-      { name: "description", content: "Manage the FOOT HOUSE home page hero banner." },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Home Banners | FOOT HOUSE Admin" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminBanner,
 });
 
-type BannerForm = {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  button_text: string;
-  button_link: BannerLink;
-};
+type Draft = { eyebrow: string; title: string; subtitle: string; button_text: string; button_link: string; text_color: BannerTextColor; overlay: BannerOverlay; text_align: BannerTextAlign; image_path: string | null; active: boolean; starts_at: string; ends_at: string | null };
+const input = "h-11 w-full rounded-xl bg-surface px-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring";
+const card = "rounded-2xl border border-border bg-card p-5 shadow-sm";
+const limits = { eyebrow: 60, title: 60, subtitle: 120, button_text: 24 } as const;
 
-const LIMITS = { eyebrow: 60, title: 60, subtitle: 120, button_text: 24 } as const;
-const ACCEPTED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const input = "h-11 w-full rounded-xl bg-surface px-4 text-sm text-foreground outline-none ring-primary focus:ring-2";
-const card = "space-y-4 rounded-[24px] bg-card p-6";
-const label = "mb-1.5 block text-xs font-semibold text-foreground";
-
-const formFrom = (banner: typeof BANNER_DEFAULTS | HomeBanner): BannerForm => ({
-  eyebrow: banner.eyebrow,
-  title: banner.title,
-  subtitle: banner.subtitle,
-  button_text: banner.button_text,
-  button_link: normalizeBannerLink(banner.button_link),
-});
+function blank(sortOrder: number): Draft { return { eyebrow: DEFAULT_BANNER.eyebrow, title: DEFAULT_BANNER.title, subtitle: DEFAULT_BANNER.subtitle, button_text: DEFAULT_BANNER.button_text, button_link: "/search", text_color: "light", overlay: "soft", text_align: "left", image_path: null, active: true, starts_at: new Date().toISOString(), ends_at: null }; }
+function fromBanner(b: HomeBanner): Draft { return { eyebrow: b.eyebrow, title: b.title, subtitle: b.subtitle, button_text: b.button_text, button_link: b.button_link, text_color: b.text_color as BannerTextColor, overlay: b.overlay as BannerOverlay, text_align: b.text_align as BannerTextAlign, image_path: b.image_path, active: b.active, starts_at: b.starts_at, ends_at: b.ends_at }; }
+function status(b: HomeBanner) { const now = Date.now(); if (!b.active) return ["Hidden", "bg-surface text-muted-foreground"]; if (new Date(b.starts_at).getTime() > now) return ["Scheduled", "bg-primary/10 text-primary"]; if (b.ends_at && new Date(b.ends_at).getTime() <= now) return ["Ended", "bg-destructive/10 text-destructive"]; return ["Live", "bg-primary/10 text-primary"]; }
+function daysUntil(date: string | null) { return date ? Math.max(0, Math.ceil((new Date(date).getTime() - Date.now()) / 86_400_000)) : null; }
 
 function AdminBanner() {
-  const qc = useQueryClient();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const originalPath = useRef<string | null>(null);
-  const pendingPaths = useRef<string[]>([]);
-  const { data, isLoading, error } = useQuery(bannerQuery);
-  const [form, setForm] = useState<BannerForm>(formFrom(BANNER_DEFAULTS));
-  const [imagePath, setImagePath] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [cropFile, setCropFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const qc = useQueryClient(); const fileRef = useRef<HTMLInputElement>(null); const move = useMoveBanner();
+  const { data: banners = [], isLoading, error } = useQuery(adminBannersQuery); const { data: products = [] } = useQuery(publishedProductsQuery);
+  const [open, setOpen] = useState(false); const [editing, setEditing] = useState<HomeBanner | null>(null); const [draft, setDraft] = useState<Draft>(blank(0)); const [showFor, setShowFor] = useState("always"); const [cropFile, setCropFile] = useState<File | null>(null); const [previewUrl, setPreviewUrl] = useState<string | null>(null); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [productSearch, setProductSearch] = useState(""); const originalPath = useRef<string | null>(null); const pendingPaths = useRef<string[]>([]);
+  const previewBanner = { ...DEFAULT_BANNER, ...draft, id: editing?.id ?? "preview", image_path: draft.image_path } as HomeBanner;
+  const filteredProducts = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(productSearch.toLowerCase())).slice(0, 20), [products, productSearch]);
+  const productId = draft.button_link.startsWith("/product/") ? draft.button_link.slice(9) : "";
+  const set = (key: keyof Draft, value: string | boolean | null) => setDraft((current) => ({ ...current, [key]: value } as Draft));
 
-  useEffect(() => {
-    if (!data) return;
-    setForm(formFrom(data));
-    setImagePath(data.image_path);
-    originalPath.current = data.image_path;
-  }, [data]);
+  const openNew = () => { setEditing(null); setDraft(blank(banners.length)); setShowFor("always"); setPreviewUrl(null); originalPath.current = null; pendingPaths.current = []; setOpen(true); };
+  const openEdit = (banner: HomeBanner) => { setEditing(banner); setDraft(fromBanner(banner)); setShowFor(banner.ends_at ? "keep" : "always"); setPreviewUrl(null); originalPath.current = banner.image_path; pendingPaths.current = []; setOpen(true); };
+  const chooseFile = (file?: File) => { if (!file) return; if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return toast.error("Please choose a PNG, JPG, or WEBP image."); if (file.size > 10 * 1024 * 1024) return toast.error("Banner images must be under 10 MB."); setCropFile(file); };
+  const finishCrop = async (file: File) => { setUploading(true); try { const path = await uploadBannerImage(file); pendingPaths.current.push(path); set("image_path", path); setPreviewUrl(URL.createObjectURL(file)); setCropFile(null); } catch (e) { toast.error((e as Error).message || "Couldn't upload the banner image."); } finally { setUploading(false); } };
+  const save = async (event: React.FormEvent) => { event.preventDefault(); if (!draft.title.trim() && !draft.image_path) return toast.error("Add a title or photo before saving."); setSaving(true); try { const values: BannerInsert = { ...draft, button_link: draft.button_link || "/home", sort_order: editing?.sort_order ?? banners.length } as BannerInsert; if (editing) await updateBanner(editing.id, values); else await createBanner(values); if (originalPath.current && originalPath.current !== draft.image_path) await deleteBannerImage(originalPath.current); for (const path of pendingPaths.current) if (path !== draft.image_path) await deleteBannerImage(path); await qc.invalidateQueries({ queryKey: ["home-banners"] }); setOpen(false); toast.success(editing ? "Banner updated" : "Banner created"); } catch (e) { toast.error((e as Error).message || "Couldn't save the banner."); } finally { setSaving(false); } };
 
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
-
-  const update = (key: keyof BannerForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
-  const imageUrl = previewUrl ?? bannerImageUrl(imagePath) ?? heroImage;
-
-  const onFile = (file: File | undefined) => {
-    if (!file) return;
-    if (!ACCEPTED_TYPES.has(file.type)) {
-      toast.error("Please choose a PNG, JPG, or WEBP image.");
-      return;
-    }
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("Banner images must be under 10 MB.");
-      return;
-    }
-    setCropFile(file);
-  };
-
-  const finishCrop = async (cropped: File) => {
-    setUploading(true);
-    try {
-      const path = await uploadBannerImage(cropped);
-      pendingPaths.current.push(path);
-      setImagePath(path);
-      setPreviewUrl(URL.createObjectURL(cropped));
-      setCropFile(null);
-    } catch (e) {
-      toast.error((e as Error).message || "Couldn't upload the banner image.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await saveBanner({ ...form, image_path: imagePath });
-      if (originalPath.current && originalPath.current !== imagePath) await deleteBannerImage(originalPath.current);
-      for (const path of pendingPaths.current) {
-        if (path !== imagePath) await deleteBannerImage(path);
-      }
-      pendingPaths.current = imagePath ? [imagePath] : [];
-      originalPath.current = imagePath;
-      await qc.invalidateQueries({ queryKey: bannerQuery.queryKey });
-      toast.success("Banner updated");
-    } catch (e) {
-      toast.error((e as Error).message || "Couldn't update the banner.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const reset = async () => {
-    if (!window.confirm("Reset the home banner to the default text and remove its custom image?")) return;
-    const previousForm = form;
-    const previousPath = imagePath;
-    setForm(formFrom(BANNER_DEFAULTS));
-    setImagePath(null);
-    setPreviewUrl(null);
-    setSaving(true);
-    try {
-      await saveBanner({ ...BANNER_DEFAULTS, image_path: null });
-      if (previousPath) await deleteBannerImage(previousPath);
-      for (const path of pendingPaths.current) {
-        if (path !== previousPath) await deleteBannerImage(path);
-      }
-      pendingPaths.current = [];
-      originalPath.current = null;
-      await qc.invalidateQueries({ queryKey: bannerQuery.queryKey });
-      toast.success("Banner reset to default");
-    } catch (e) {
-      setForm(previousForm);
-      setImagePath(previousPath);
-      toast.error((e as Error).message || "Couldn't reset the banner.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading banner…</p>;
-  if (error) return <p className="p-8 text-sm text-destructive">Couldn't load the banner settings.</p>;
-
-  return (
-    <form onSubmit={save} className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Home banner</h1>
-          <p className="text-sm text-muted-foreground">Edit the hero section shown on the customer home page.</p>
-        </div>
-        <div className="flex gap-2">
-          <FhButton size="md" type="button" variant="outline" className="h-11 px-5" onClick={reset} disabled={saving || uploading}>Reset to default</FhButton>
-          <FhButton size="md" type="submit" disabled={saving || uploading} className="h-11 px-6">{saving ? "Saving…" : "Save"}</FhButton>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
-          <section className={card}>
-            <h2 className="font-semibold text-foreground">Live preview</h2>
-            <div className="relative aspect-[21/9] overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm">
-              <img src={imageUrl} alt={form.title || "Home banner preview"} width={1600} height={686} decoding="async" className="h-full w-full object-cover object-top opacity-75" />
-              <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-5">
-                {form.eyebrow && <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{form.eyebrow}</span>}
-                {form.title && <h2 className="text-headline-md">{form.title}</h2>}
-                {form.subtitle && <p className="text-xs text-primary-foreground/80">{form.subtitle}</p>}
-                {form.button_text && <Link to={form.button_link} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">{form.button_text}<Icon name="arrow_forward" className="text-[16px]" /></Link>}
-              </div>
-            </div>
-          </section>
-
-          <section className={card}>
-            <h2 className="font-semibold text-foreground">Banner photo</h2>
-            <div className="flex items-center gap-3">
-              <FhButton type="button" size="md" variant="outline" className="h-11 px-5" onClick={() => inputRef.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : "Change photo"}</FhButton>
-              <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { onFile(e.target.files?.[0]); e.currentTarget.value = ""; }} />
-              <span className="text-xs text-muted-foreground">PNG, JPG or WEBP · max 10 MB</span>
-            </div>
-          </section>
-        </div>
-
-        <section className={card}>
-          <h2 className="font-semibold text-foreground">Banner text</h2>
-          <TextField label="Small label" value={form.eyebrow} maxLength={LIMITS.eyebrow} onChange={(v) => update("eyebrow", v)} />
-          <TextField label="Title" value={form.title} maxLength={LIMITS.title} onChange={(v) => update("title", v)} />
-          <TextField label="Subtitle" value={form.subtitle} maxLength={LIMITS.subtitle} onChange={(v) => update("subtitle", v)} />
-          <TextField label="Button text" value={form.button_text} maxLength={LIMITS.button_text} onChange={(v) => update("button_text", v)} />
-          <div>
-            <label className={label}>Button goes to</label>
-            <select className={input} value={form.button_link} onChange={(e) => update("button_link", e.target.value)}>
-              <option value="/search">Search</option>
-              <option value="/wishlist">Wishlist</option>
-              <option value="/home">Home</option>
-            </select>
-          </div>
-        </section>
-      </div>
-
-      {cropFile && <ImageCropper file={cropFile} aspect={7 / 3} guideAspect={2.03} outputSize={1600} allowFit={false} onDone={finishCrop} onCancel={() => setCropFile(null)} />}
-    </form>
-  );
+  if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading banners…</p>;
+  if (error) return <p className="p-8 text-sm text-destructive">Couldn’t load banners.</p>;
+  return <div className="space-y-6">
+    <div className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-3xl font-bold text-foreground">Home banners</h1><p className="mt-1 text-sm text-muted-foreground">Customers see live banners in this order and they slide automatically.</p></div><div className="text-right"><FhButton onClick={openNew} disabled={banners.length >= MAX_BANNERS}>Add banner</FhButton>{banners.length >= MAX_BANNERS && <p className="mt-1 text-xs text-muted-foreground">You can add up to 8 banners.</p>}</div></div>
+    {!banners.length ? <div className={`${card} py-12 text-center text-sm text-muted-foreground`}>No banners yet. Customers see the default banner.</div> : <div className="space-y-4">{banners.map((banner, index) => <BannerCard key={banner.id} banner={banner} index={index} count={banners.length} onEdit={openEdit} onMove={(direction) => move.mutate({ id: banner.id, direction })} onToggle={async () => { try { await toggleActive(banner.id, !banner.active); await qc.invalidateQueries({ queryKey: ["home-banners"] }); } catch (e) { toast.error((e as Error).message); } }} onDelete={async () => { try { await deleteBanner(banner); await qc.invalidateQueries({ queryKey: ["home-banners"] }); toast.success("Banner deleted"); } catch (e) { toast.error((e as Error).message); } }} />)}</div>}
+    <p className="text-xs text-muted-foreground">Slides change every 6.5 seconds. Customers can also swipe.</p>
+    <Sheet open={open} onOpenChange={setOpen}><SheetContent className="w-full overflow-y-auto sm:max-w-xl"><SheetHeader><SheetTitle>{editing ? "Edit banner" : "Add banner"}</SheetTitle><SheetDescription>Manage the customer-facing hero slide.</SheetDescription></SheetHeader><form onSubmit={save} className="mt-6 space-y-5">
+      <div className="space-y-3"><label className="text-sm font-semibold text-foreground">Photo</label><div className="flex items-center gap-3"><FhButton type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : "Change photo"}</FhButton><span className="text-xs text-muted-foreground">PNG, JPG or WEBP · max 10 MB</span></div><input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { chooseFile(e.target.files?.[0]); e.currentTarget.value = ""; }} />{cropFile && <ImageCropper file={cropFile} aspect={3} outputSize={1920} allowFit={false} guideAspect={[{ aspect: 16 / 9, label: "Phone" }, { aspect: 3.4, label: "Laptop" }]} onDone={finishCrop} onCancel={() => setCropFile(null)} />}</div>
+      <div className="space-y-3"><Field label="Small label" value={draft.eyebrow} max={limits.eyebrow} onChange={(v) => set("eyebrow", v)} /><Field label="Title" value={draft.title} max={limits.title} onChange={(v) => set("title", v)} /><Field label="Subtitle" value={draft.subtitle} max={limits.subtitle} onChange={(v) => set("subtitle", v)} /><Field label="Button text" value={draft.button_text} max={limits.button_text} onChange={(v) => set("button_text", v)} /></div>
+      <label className="block text-sm font-semibold text-foreground">Button goes to<select value={draft.button_link.startsWith("/product/") ? "product" : draft.button_link} onChange={(e) => set("button_link", e.target.value === "product" ? `/product/${products[0]?.id ?? ""}` : e.target.value)} className={`${input} mt-2`}><option value="/search">Search</option><option value="/wishlist">Wishlist</option><option value="/bag">Bag</option><option value="/home">Home</option><option value="product">A product…</option></select></label>
+      {draft.button_link.startsWith("/product/") && <div><input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Search products" className={input} /><select value={productId} onChange={(e) => set("button_link", `/product/${e.target.value}`)} className={`${input} mt-2`}>{filteredProducts.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>}
+      <div className="grid grid-cols-2 gap-3"><Select label="Text colour" value={draft.text_color} onChange={(v) => set("text_color", v)} options={[["light", "Light"], ["dark", "Dark"]]} /><Select label="Overlay" value={draft.overlay} onChange={(v) => set("overlay", v)} options={[["none", "None"], ["soft", "Soft"], ["strong", "Strong"]]} /><Select label="Text position" value={draft.text_align} onChange={(v) => set("text_align", v)} options={[["left", "Left"], ["center", "Centre"]]} /><Select label="Show for" value={showFor} onChange={(v) => { setShowFor(v); if (v !== "keep") set("ends_at", v === "always" ? null : new Date(Date.now() + Number(v) * 86_400_000).toISOString()); }} options={[...(editing ? [["keep", "Keep as is"]] : []), ["always", "Always"], ["1", "1 day from now"], ["3", "3 days from now"], ["7", "7 days from now"], ["14", "14 days from now"], ["30", "30 days from now"]]} /></div>
+      <label className="flex items-center justify-between rounded-xl bg-surface p-3 text-sm font-semibold text-foreground">Visible<input type="checkbox" checked={draft.active} onChange={(e) => set("active", e.target.checked)} className="h-4 w-4 accent-black" /></label>
+      <div className="space-y-3"><p className="text-sm font-semibold text-foreground">Preview</p><div className="overflow-hidden rounded-2xl"><HeroSlide banner={previewBanner} imageUrl={previewUrl ?? undefined} mode="laptop" index={0} total={1} /></div><div className="mx-auto max-w-[360px] overflow-hidden rounded-2xl"><HeroSlide banner={previewBanner} imageUrl={previewUrl ?? undefined} mode="phone" index={0} total={1} /></div></div>
+      <FhButton type="submit" className="w-full" disabled={saving || uploading}>{saving ? "Saving…" : "Save banner"}</FhButton>
+    </form></SheetContent></Sheet>
+  </div>;
 }
 
-function TextField({ label: fieldLabel, value, maxLength, onChange }: { label: string; value: string; maxLength: number; onChange: (value: string) => void }) {
-  return (
-    <div>
-      <label className={label}>{fieldLabel}</label>
-      <input className={input} value={value} maxLength={maxLength} onChange={(e) => onChange(e.target.value)} />
-      <p className="mt-1 text-right text-[11px] text-muted-foreground">{value.length}/{maxLength}</p>
-    </div>
-  );
-}
+function BannerCard({ banner, index, count, onEdit, onMove, onToggle, onDelete }: { banner: HomeBanner; index: number; count: number; onEdit: (banner: HomeBanner) => void; onMove: (direction: "up" | "down") => void; onToggle: () => void; onDelete: () => void }) { const [label, className] = status(banner); const days = daysUntil(banner.ends_at); return <article className={`${card} flex flex-col gap-4 lg:flex-row lg:items-center`}><div className="w-full shrink-0 overflow-hidden rounded-xl lg:w-64"><HeroSlide banner={banner} index={0} total={1} /></div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Banner {index + 1}</p><h2 className="font-bold text-foreground">{banner.title || "Untitled banner"}</h2><p className="mt-1 text-sm text-muted-foreground">{days !== null && days > 0 ? `Ends in ${days} day${days === 1 ? "" : "s"}` : days === 0 ? "Ended" : "No end date"}</p></div><span className={`rounded-full px-3 py-1 text-xs font-semibold ${className}`}>{label}</span></div><div className="mt-4 flex flex-wrap gap-2"><FhButton size="sm" variant="outline" onClick={() => onMove("up")} disabled={index === 0}><Icon name="arrow_upward" /></FhButton><FhButton size="sm" variant="outline" onClick={() => onMove("down")} disabled={index === count - 1}><Icon name="arrow_downward" /></FhButton><FhButton size="sm" variant="soft" onClick={onToggle}>{banner.active ? "Hide" : "Show"}</FhButton><FhButton size="sm" variant="outline" onClick={() => onEdit(banner)}>Edit</FhButton><AlertDialog><AlertDialogTrigger asChild><FhButton size="sm" variant="ghost">Delete</FhButton></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete banner?</AlertDialogTitle><AlertDialogDescription>This banner and its image will be removed.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div></div></article>; }
+function Field({ label, value, max, onChange }: { label: string; value: string; max: number; onChange: (value: string) => void }) { return <label className="block text-sm font-semibold text-foreground">{label}<span className="ml-2 font-normal text-muted-foreground">{value.length}/{max}</span><input value={value} maxLength={max} onChange={(e) => onChange(e.target.value)} className={`${input} mt-2`} /></label>; }
+function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[][] }) { return <label className="block text-sm font-semibold text-foreground">{label}<select value={value} onChange={(e) => onChange(e.target.value)} className={`${input} mt-2`}>{options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>; }

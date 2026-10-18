@@ -154,6 +154,63 @@ export type Database = {
         }
         Relationships: []
       }
+      home_banners: {
+        Row: {
+          active: boolean
+          button_link: string
+          button_text: string
+          created_at: string
+          ends_at: string | null
+          eyebrow: string
+          id: string
+          image_path: string | null
+          overlay: string
+          sort_order: number
+          starts_at: string
+          subtitle: string
+          text_align: string
+          text_color: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          button_link?: string
+          button_text?: string
+          created_at?: string
+          ends_at?: string | null
+          eyebrow?: string
+          id?: string
+          image_path?: string | null
+          overlay?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string
+          text_align?: string
+          text_color?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          button_link?: string
+          button_text?: string
+          created_at?: string
+          ends_at?: string | null
+          eyebrow?: string
+          id?: string
+          image_path?: string | null
+          overlay?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string
+          text_align?: string
+          text_color?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string

@@ -35,7 +35,7 @@ export function BottomNav() {
               <span className="relative">
                 <Icon name={t.icon} filled={isActive} className="text-[24px]" />
                 {t.to === "/bag" && count > 0 && (
-                  <span aria-label={`${count} items in bag`} className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{count}</span>
+                  <span aria-label={`${count} items in bag`} className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{count}</span>
                 )}
                 {t.to === "/wishlist" && <WishlistCountBadge count={ids.length} />}
               </span>
@@ -117,13 +117,13 @@ function NotificationBadge({ count }: { count: number }) {
 function WishlistCountBadge({ count }: { count: number }) {
   if (!count) return null;
   const display = count > 99 ? "99+" : count;
-  return <span aria-label={`Wishlist, ${display} items`} className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{display}</span>;
+  return <span aria-label={`Wishlist, ${display} items`} className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{display}</span>;
 }
 
 function DesktopBagCount() {
   const { count } = useCart();
   if (!count) return null;
-  return <span aria-label={`${count} items in bag`} className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{count}</span>;
+  return <span aria-label={`${count} items in bag`} className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">{count}</span>;
 }
 
 export function StorePage({ children, header = true }: { children: ReactNode; header?: boolean }) {

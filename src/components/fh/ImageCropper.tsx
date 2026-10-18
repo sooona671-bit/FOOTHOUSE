@@ -12,7 +12,7 @@ type Props = {
   outputSize?: number;
   round?: boolean;
   aspect?: number;
-  guideAspect?: number;
+  guideAspect?: number | { aspect: number; label: string }[];
   allowFit?: boolean;
 };
 
@@ -70,6 +70,9 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
     return { x: Math.min(limX, Math.max(-limX, p.x)), y: Math.min(limY, Math.max(-limY, p.y)) };
   };
   const eff = clampPos(pos);
+  const guides = typeof guideAspect === "number"
+    ? [{ aspect: guideAspect, label: "Phone view", legacy: true }]
+    : (guideAspect ?? []).map((guide) => ({ ...guide, legacy: false }));
 
   const onLoad = async () => {
     const img = imgRef.current;
@@ -209,14 +212,13 @@ export function ImageCropper({ file, onDone, onCancel, outputSize = 1200, round 
             <div className="absolute left-0 top-1/3 h-px w-full bg-black/15" />
             <div className="absolute left-0 top-2/3 h-px w-full bg-black/15" />
             {round && <div className="absolute inset-0 rounded-full border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />}
-            {guideAspect && (
-              <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-dashed border-white/90"
-                style={{ width: frameHeight * guideAspect, height: frameHeight }}
-              >
-                <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">Phone view</span>
-              </div>
-            )}
+            {guides.map((guide) => {
+              const width = guide.legacy ? frameHeight * guide.aspect : Math.min(frame, frameHeight * guide.aspect);
+              const height = guide.legacy ? frameHeight : width / guide.aspect;
+              return <div key={`${guide.label}-${guide.aspect}`} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-dashed border-white/90" style={{ width, height }}>
+                <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">{guide.label}</span>
+              </div>;
+            })}
           </div>
           {loading && (
             <p className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">

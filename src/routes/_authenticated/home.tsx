@@ -2,12 +2,13 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { departments, heroImage } from "@/data/sample-catalog";
-import { bannerImageUrl, bannerQuery, BANNER_DEFAULTS, normalizeBannerLink } from "@/lib/banner";
+import { departments } from "@/data/sample-catalog";
+import { liveBannersQuery } from "@/lib/banner";
 import { publishedProductsQuery } from "@/lib/products";
 import { Icon } from "@/components/fh/primitives";
 import { ProductCard } from "@/components/fh/ProductCard";
 import { StorePage } from "@/components/fh/StoreLayout";
+import { HeroCarousel } from "@/components/fh/HeroCarousel";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -24,9 +25,8 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function Home() {
   const [dept, setDept] = useState(departments[0]);
-  const { data: customBanner } = useQuery(bannerQuery);
+  const { data: banners = [] } = useQuery(liveBannersQuery);
   const { data: products = [], isLoading, error } = useQuery(publishedProductsQuery);
-  const banner = { ...BANNER_DEFAULTS, ...(customBanner ?? {}) };
   const shown = dept === departments[0] ? products : products.filter((p) => p.category === dept);
   return (
     <StorePage>
@@ -37,26 +37,7 @@ function Home() {
           <Icon name="tune" className="text-[18px] text-outline" />
         </Link>
 
-        <div className="relative overflow-hidden rounded-[26px] bg-primary text-primary-foreground shadow-sm lg:aspect-[21/9] lg:rounded-3xl">
-          <img
-            src={bannerImageUrl(banner.image_path) ?? heroImage}
-            alt={banner.title || "New season drop"}
-            width={832}
-            height={1024}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="h-48 w-full object-cover object-top opacity-75 lg:h-full"
-          />
-          <div className="bg-banner-fade absolute inset-0 flex flex-col justify-end p-5">
-            {banner.eyebrow && <span className="text-caption font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{banner.eyebrow}</span>}
-            {banner.title && <h2 className="text-headline-md">{banner.title}</h2>}
-            {banner.subtitle && <p className="text-xs text-primary-foreground/80">{banner.subtitle}</p>}
-            {banner.button_text && <Link to={normalizeBannerLink(banner.button_link)} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-background px-4 py-2 text-label-md text-foreground">
-              {banner.button_text} <Icon name="arrow_forward" className="text-[16px]" />
-            </Link>}
-          </div>
-        </div>
+        <HeroCarousel banners={banners} />
 
         <section>
           <div className="mb-3 flex items-center justify-between">
