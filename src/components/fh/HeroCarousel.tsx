@@ -109,7 +109,7 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
   }, []);
 
   return (
-    <div ref={carousel} className="group relative -mb-2" role="region" aria-roledescription="carousel" aria-label="Featured banners" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+    <div ref={carousel} className="group relative" role="region" aria-roledescription="carousel" aria-label="Featured banners" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       <style>{"@keyframes banner-dot-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}"}</style>
       <div
         ref={scroller}
