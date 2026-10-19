@@ -39,6 +39,8 @@ function Home() {
   const { data: categories = [] } = useQuery(categoriesQuery);
   const selectedAudience = search.for ?? "";
   const selectedCategory = search.cat ?? "";
+  const visibleCategoryNames = new Set(products.filter((product) => matchesAudience(product.audience, selectedAudience)).map((product) => product.category));
+  const departmentCategories = categories.filter((category) => visibleCategoryNames.has(category.name));
   const setFilters = (patch: { for?: CustomerAudience | undefined; cat?: string | undefined }) => navigate({ search: (previous) => ({ ...previous, ...patch }), replace: true });
   const shown = products.filter((p) => (!selectedCategory || p.category === selectedCategory) && matchesAudience(p.audience, selectedAudience));
   return (
@@ -66,7 +68,7 @@ function Home() {
             <h3 className="text-headline-sm text-foreground">Departments</h3>
           </div>
           <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-nowrap lg:overflow-visible lg:px-0">
-            {["All Drops", ...categories.map((category) => category.name)].map((d) => (
+            {["All Drops", ...departmentCategories.map((category) => category.name)].map((d) => (
               <button
                 key={d}
                 onClick={() => setFilters({ cat: d === "All Drops" ? undefined : d })}

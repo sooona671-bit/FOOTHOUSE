@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_BUCKET, parseColors, parseSizes, uploadProductImage, type ProductWithUrls } from "@/lib/products";
-import { adminCategoriesQuery, createCategory, type Audience } from "@/lib/categories";
+import { categoriesQuery, createCategory, type Audience } from "@/lib/categories";
 import { FhButton, Icon } from "@/components/fh/primitives";
 import { ImageCropper } from "@/components/fh/ImageCropper";
 
@@ -30,11 +30,11 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
   const [removed, setRemoved] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const { data: adminCategories = [] } = useQuery(adminCategoriesQuery);
+  const { data: categories = [] } = useQuery(categoriesQuery);
 
   useEffect(() => {
-    if (!product && !category && adminCategories[0]) setCategory(adminCategories[0].name);
-  }, [adminCategories, category, product]);
+    if (!product && !category && categories[0]) setCategory(categories[0].name);
+  }, [categories, category, product]);
 
   // Every photo goes through the square cropper before it is uploaded.
   const [cropFile, setCropFile] = useState<File | null>(null);
@@ -123,7 +123,7 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
       setCategory(created.name);
       setNewCategory("");
       setNewCategoryOpen(false);
-      await qc.invalidateQueries({ queryKey: adminCategoriesQuery.queryKey });
+      await qc.invalidateQueries({ queryKey: categoriesQuery.queryKey });
       toast.success("Category added");
     } catch (error) {
       toast.error((error as Error).message || "Couldn't add category");
@@ -177,8 +177,8 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
               <div>
                 <label className={label}>Category</label>
                 <select className={input} value={newCategoryOpen ? "__new__" : category} onChange={(e) => e.target.value === "__new__" ? setNewCategoryOpen(true) : (setNewCategoryOpen(false), setCategory(e.target.value))}>
-                  {category && !adminCategories.some((item) => item.name === category) && <option value={category}>{category} (hidden)</option>}
-                  {adminCategories.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}
+                  {category && !categories.some((item) => item.name === category) && <option value={category}>{category} (hidden)</option>}
+                  {categories.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}
                   <option value="__new__">+ Add new category…</option>
                 </select>
                 {newCategoryOpen && (

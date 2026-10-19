@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import { BRAND, Icon, Monogram } from "./primitives";
 import { useCart, useWishlist } from "@/lib/shop";
 import { useNotifications } from "@/lib/notifications";
@@ -49,6 +50,7 @@ export function BottomNav() {
 }
 
 export function StoreHeader() {
+  const { pathname } = useLocation();
   const { unreadCount } = useNotifications();
   const { ids } = useWishlist();
   const { user } = useAuth();
@@ -60,7 +62,7 @@ export function StoreHeader() {
         <Monogram />
         <span className="text-[15px] font-extrabold uppercase tracking-[0.2em] text-foreground">{BRAND}</span>
       </Link>
-      <Link to="/search" aria-label="Search products" className="hidden h-11 flex-1 items-center gap-3 rounded-full bg-surface px-4 text-sm text-outline transition hover:bg-surface-high lg:flex lg:max-w-xl">
+      <Link to="/search" aria-label="Search products" className={cn("hidden h-11 flex-1 items-center gap-3 rounded-full bg-surface px-4 text-sm text-outline transition hover:bg-surface-high lg:max-w-xl", pathname === "/search" ? "lg:hidden" : "lg:flex")}>
         <Icon name="search" className="text-[20px]" />
         <span>Search sneakers, boots, formal…</span>
       </Link>
