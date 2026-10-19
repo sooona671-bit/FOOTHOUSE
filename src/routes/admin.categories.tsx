@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FhButton } from "@/components/fh/primitives";
 import { adminCategoriesQuery, categoriesQuery, createCategory, deleteCategory } from "@/lib/categories";
 
@@ -14,12 +15,14 @@ export const Route = createFileRoute("/admin/categories")({
 function AdminCategories() {
   const queryClient = useQueryClient();
   const { data: categories = [], isLoading, error } = useQuery(adminCategoriesQuery);
+  const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const add = useMutation({
     mutationFn: () => createCategory(name),
     onSuccess: async () => {
       setName("");
       await refresh(queryClient);
+      setModalOpen(false);
       toast.success("Category added");
     },
     onError: (err: Error) => toast.error(err.message),
@@ -37,7 +40,7 @@ function AdminCategories() {
   return <div className="space-y-6">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><h1 className="text-3xl font-bold text-foreground">Categories</h1><p className="mt-1 text-sm text-muted-foreground">These appear as Departments on the home screen, in this order.</p></div>
-      <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) add.mutate(); }} className="flex w-full max-w-md gap-2"><input className={`${input} min-w-0 flex-1`} maxLength={24} value={name} onChange={(event) => setName(event.target.value)} placeholder="New category" aria-label="New category" /><FhButton type="submit" disabled={add.isPending || !name.trim()}>{add.isPending ? "Adding…" : "Add category"}</FhButton></form>
+      <FhButton type="button" size="md" onClick={() => { setName(""); setModalOpen(true); }}>Add category</FhButton>
     </div>
     {isLoading && <p className="text-sm text-muted-foreground">Loading categories…</p>}
     {error && <p className="text-sm text-destructive">Couldn't load categories. Please try again.</p>}
@@ -51,6 +54,24 @@ function AdminCategories() {
         </div>
       </div>)}
     </div>}
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+      <DialogContent className="rounded-3xl sm:max-w-md">
+        <DialogHeader className="text-left">
+          <DialogTitle>Add category</DialogTitle>
+          <DialogDescription>Create a department for the Home page. Category names must be 24 characters or fewer.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) add.mutate(); }} className="space-y-4">
+          <div>
+            <label htmlFor="new-category-name" className="mb-1.5 block text-xs font-semibold text-foreground">Category name</label>
+            <input id="new-category-name" autoFocus maxLength={24} value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Running" className={`${input} w-full`} />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <button type="button" onClick={() => setModalOpen(false)} className="h-9 rounded-full border border-border px-4 text-sm text-foreground">Cancel</button>
+            <FhButton type="submit" size="sm" disabled={add.isPending || !name.trim()}>{add.isPending ? "Creating…" : "Create category"}</FhButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   </div>;
 }
 
