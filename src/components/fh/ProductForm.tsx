@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, PRODUCT_BUCKET, parseColors, parseSizes, uploadProductImage, type ProductWithUrls } from "@/lib/products";
+import { PRODUCT_BUCKET, parseColors, parseSizes, uploadProductImage, type ProductWithUrls } from "@/lib/products";
+import { adminCategoriesQuery, createCategory, type Audience } from "@/lib/categories";
 import { FhButton, Icon } from "@/components/fh/primitives";
 import { ImageCropper } from "@/components/fh/ImageCropper";
 
@@ -12,7 +13,11 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
   const qc = useQueryClient();
   const [name, setName] = useState(product?.name ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
-  const [category, setCategory] = useState<string>(product?.category ?? "Sneakers");
+  const [category, setCategory] = useState<string>(product?.category ?? "");
+  const [audience, setAudience] = useState<Audience>((product?.audience as Audience) || "unisex");
+  const [newCategory, setNewCategory] = useState("");
+  const [newCategoryOpen, setNewCategoryOpen] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
   const [price, setPrice] = useState(product ? String(product.price) : "");
   const [compareAt, setCompareAt] = useState(product?.compare_at_price != null ? String(product.compare_at_price) : "");
   const [sizes, setSizes] = useState((product?.sizes ?? []).join(", "));
@@ -25,6 +30,11 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
   const [removed, setRemoved] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { data: adminCategories = [] } = useQuery(adminCategoriesQuery);
+
+  useEffect(() => {
+    if (!product && !category && adminCategories[0]) setCategory(adminCategories[0].name);
+  }, [adminCategories, category, product]);
 
   // Every photo goes through the square cropper before it is uploaded.
   const [cropFile, setCropFile] = useState<File | null>(null);
@@ -88,7 +98,7 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
     }
     setSaving(true);
     const row = {
-      name: name.trim(), description: description.trim(), category, price: priceNum, compare_at_price: compareNum,
+      name: name.trim(), description: description.trim(), category: category.trim(), audience, price: priceNum, compare_at_price: compareNum,
       sizes: parseSizes(sizes), colors: parseColors(colors), stock: stockNum, published, images: images.map((i) => i.path),
     };
     const { error } = product
@@ -105,6 +115,22 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
   const input = "h-11 w-full rounded-xl bg-surface px-4 text-sm text-foreground outline-none ring-primary focus:ring-2";
   const card = "space-y-4 rounded-[24px] bg-card p-6";
   const label = "mb-1.5 block text-xs font-semibold text-foreground";
+
+  const saveNewCategory = async () => {
+    try {
+      setSavingCategory(true);
+      const created = await createCategory(newCategory);
+      setCategory(created.name);
+      setNewCategory("");
+      setNewCategoryOpen(false);
+      await qc.invalidateQueries({ queryKey: adminCategoriesQuery.queryKey });
+      toast.success("Category added");
+    } catch (error) {
+      toast.error((error as Error).message || "Couldn't add category");
+    } finally {
+      setSavingCategory(false);
+    }
+  };
 
   return (
     <form onSubmit={save} className="space-y-6">
@@ -147,10 +173,31 @@ export function ProductForm({ product }: { product?: ProductWithUrls }) {
               <option value="1">Published — visible in the store</option>
               <option value="0">Draft — hidden from customers</option>
             </select>
-            <label className={label}>Category</label>
-            <select className={input} value={category} onChange={(e) => setCategory(e.target.value)}>
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label}>Category</label>
+                <select className={input} value={newCategoryOpen ? "__new__" : category} onChange={(e) => e.target.value === "__new__" ? setNewCategoryOpen(true) : (setNewCategoryOpen(false), setCategory(e.target.value))}>
+                  {category && !adminCategories.some((item) => item.name === category) && <option value={category}>{category} (hidden)</option>}
+                  {adminCategories.map((item) => <option key={item.id} value={item.name}>{item.name}</option>)}
+                  <option value="__new__">+ Add new category…</option>
+                </select>
+                {newCategoryOpen && (
+                  <div className="mt-2 flex gap-2">
+                    <input className={input} maxLength={24} value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="New category" />
+                    <FhButton type="button" size="sm" disabled={savingCategory || !newCategory.trim()} onClick={saveNewCategory}>Save</FhButton>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className={label}>For</label>
+                <select className={input} value={audience} onChange={(e) => setAudience(e.target.value as Audience)}>
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="kids">Kids</option>
+                  <option value="unisex">Unisex</option>
+                </select>
+              </div>
+            </div>
           </section>
         </div>
         <div className="space-y-6">

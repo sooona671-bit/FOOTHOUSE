@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           city: string
@@ -264,6 +291,7 @@ export type Database = {
       }
       products: {
         Row: {
+          audience: string
           category: string
           colors: string[]
           compare_at_price: number | null
@@ -280,6 +308,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          audience?: string
           category?: string
           colors?: string[]
           compare_at_price?: number | null
@@ -296,6 +325,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          audience?: string
           category?: string
           colors?: string[]
           compare_at_price?: number | null

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { withImageUrls, type ProductWithUrls } from "./products";
+import { matchesAudience, type CustomerAudience } from "./categories";
 import type { Tables } from "@/integrations/supabase/types";
 
 /** Prices are shown in Nepali rupees. */
@@ -22,9 +23,9 @@ export const productQuery = (id: string) =>
     },
   });
 
-export type Filters = { q: string; category: string; size: string; color: string; min: number; max: number; inStock: boolean };
+export type Filters = { q: string; category: string; audience: CustomerAudience | ""; size: string; color: string; min: number; max: number; inStock: boolean };
 
-export function filterProducts<T extends { name: string; description: string; category: string; sizes: string[]; colors: string[]; price: number; stock: number }>(
+export function filterProducts<T extends { name: string; description: string; category: string; audience?: string | null; sizes: string[]; colors: string[]; price: number; stock: number }>(
   list: T[],
   f: { [K in keyof Filters]?: Filters[K] | undefined },
 ) {
@@ -33,6 +34,7 @@ export function filterProducts<T extends { name: string; description: string; ca
     (p) =>
       (!q || `${p.name} ${p.description} ${p.category} ${p.colors.join(" ")}`.toLowerCase().includes(q)) &&
       (!f.category || f.category === "All" || p.category === f.category) &&
+      matchesAudience(p.audience, f.audience) &&
       (!f.size || p.sizes.includes(f.size)) &&
       (!f.color || p.colors.some((c) => c.toLowerCase() === f.color!.toLowerCase())) &&
       (!f.min || p.price >= f.min) &&

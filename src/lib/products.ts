@@ -6,7 +6,6 @@ export type ProductRow = Tables<"products">;
 export type ProductWithUrls = ProductRow & { imageUrls: string[] };
 
 export const PRODUCT_BUCKET = "product-images";
-export const CATEGORIES = ["Sneakers", "Formal", "Boots", "Sandals"];
 
 /** Images are stored as paths in a private bucket; resolve to signed URLs for display. */
 export async function withImageUrls(rows: ProductRow[]): Promise<ProductWithUrls[]> {

@@ -44,6 +44,7 @@ function AdminLayout() {
           <nav className="ml-4 flex gap-1 text-sm">
             <Link to="/admin" activeOptions={{ exact: true }} className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Products</Link>
             <Link to="/admin/new" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Add product</Link>
+            <Link to="/admin/categories" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Categories</Link>
             <Link to="/admin/banner" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Home banner</Link>
             <Link to="/admin/notifications" className="rounded-full px-3 py-1.5 opacity-70 [&.active]:bg-background [&.active]:text-foreground [&.active]:opacity-100">Notifications</Link>
           </nav>

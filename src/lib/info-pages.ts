@@ -81,6 +81,15 @@ const pages = {
     summary: "FOOT HOUSE app version information.",
     sections: [{ h: "FOOT HOUSE", body: [`Version ${APP_VERSION}`] }],
   },
+  licenses: {
+    title: "Licenses & Credits",
+    summary: "Technology and brand credits for the FOOT HOUSE app.",
+    sections: [
+      { h: "FOOT HOUSE", body: ["FOOT HOUSE is the brand and store experience presented by this app."] },
+      { h: "Technology", body: ["This app is built with React, TanStack Start, Tailwind CSS and Supabase. Their respective names and trademarks belong to their owners."] },
+      { h: "Open-source software", body: ["The app uses open-source packages. Their licenses and notices are maintained with the project dependencies and source code."] },
+    ],
+  },
 } satisfies Record<string, Page>;
 
 export type InfoSlug = keyof typeof pages;

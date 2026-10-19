@@ -71,7 +71,7 @@ function AdminProducts() {
                           />
                         )}
                       </div>
-                      <div><p className="font-semibold text-foreground">{p.name}</p><p className="text-xs text-muted-foreground">{p.category}</p></div>
+                      <div><p className="font-semibold text-foreground">{p.name}</p><div className="mt-1 flex flex-wrap items-center gap-1.5"><span className="text-xs text-muted-foreground">{p.category}</span><span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{p.audience || "unisex"}</span></div></div>
                     </div>
                   </td>
                   <td className="p-4">{npr(p.price)}</td>

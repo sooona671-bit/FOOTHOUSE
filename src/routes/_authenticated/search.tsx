@@ -2,21 +2,23 @@ import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, publishedProductsQuery } from "@/lib/products";
+import { publishedProductsQuery } from "@/lib/products";
+import { AUDIENCES, categoriesQuery, type CustomerAudience } from "@/lib/categories";
 import { filterProducts } from "@/lib/shop";
 import { Icon } from "@/components/fh/primitives";
 import { StorePage } from "@/components/fh/StoreLayout";
 import { ProductGrid } from "@/components/fh/ProductCard";
 
 type SP = { [K in keyof S]?: S[K] | undefined };
-type S = { q: string; category: string; size: string; color: string; min: number; max: number; inStock: boolean };
+type S = { q: string; for: CustomerAudience; cat: string; size: string; color: string; min: number; max: number; inStock: boolean };
 const str = (v: unknown) => (typeof v === "string" ? v : typeof v === "number" ? String(v) : "");
 const num = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
 export const Route = createFileRoute("/_authenticated/search")({
   validateSearch: (s: Record<string, unknown>): SP => ({
     q: str(s["q"]) || undefined,
-    category: str(s["category"]) || undefined,
+    for: ["men", "women", "kids"].includes(str(s["for"])) ? str(s["for"]) as CustomerAudience : undefined,
+    cat: str(s["cat"]) || undefined,
     size: str(s["size"]) || undefined,
     color: str(s["color"]) || undefined,
     min: num(s["min"]) || undefined,
@@ -39,11 +41,12 @@ function SearchPage() {
   const navigate = useNavigate({ from: "/search" });
   const set = (patch: SP) => navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
   const { data: products = [], isLoading, error } = useQuery(publishedProductsQuery);
+  const { data: categories = [] } = useQuery(categoriesQuery);
   const [open, setOpen] = useState(false);
-  const results = useMemo(() => filterProducts(products, search), [products, search]);
+  const results = useMemo(() => filterProducts(products, { ...search, category: search.cat, audience: search.for }), [products, search]);
   const sizes = useMemo(() => Array.from(new Set(products.flatMap((p) => p.sizes))), [products]);
   const colors = useMemo(() => Array.from(new Set(products.flatMap((p) => p.colors))), [products]);
-  const active = [search.category, search.size, search.color, search.min, search.max, search.inStock].filter(Boolean).length;
+  const active = [search.for, search.cat, search.size, search.color, search.min, search.max, search.inStock].filter(Boolean).length;
 
   return (
     <StorePage>
@@ -69,10 +72,11 @@ function SearchPage() {
           </button>
         </div>
 
-        <Chips label="Category" values={["All", ...CATEGORIES]} value={search.category ?? "All"} onChange={(v) => set({ category: v === "All" ? undefined : v })} />
+        <Chips label="Category" values={["All", ...categories.map((category) => category.name)]} value={search.cat ?? "All"} onChange={(v) => set({ cat: v === "All" ? undefined : v })} />
 
         {open && (
           <div className="space-y-4 rounded-2xl border border-border p-4">
+            <Chips label="Audience" values={["All", ...AUDIENCES.map((audience) => audience.label)]} value={search.for ? AUDIENCES.find((audience) => audience.value === search.for)?.label ?? "All" : "All"} onChange={(v) => set({ for: v === "All" ? undefined : v.toLowerCase() as CustomerAudience })} />
             {sizes.length > 0 && <Chips label="Size" values={sizes} value={search.size ?? ""} onChange={(v) => set({ size: v === search.size ? undefined : v })} />}
             {colors.length > 0 && <Chips label="Colour" values={colors} value={search.color ?? ""} onChange={(v) => set({ color: v === search.color ? undefined : v })} />}
             <div>
