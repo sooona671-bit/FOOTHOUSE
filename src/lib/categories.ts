@@ -39,6 +39,31 @@ export async function createCategory(name: string) {
   return data;
 }
 
+export const adminCategoriesQuery = queryOptions({
+  queryKey: ["categories", "admin"] as const,
+  queryFn: async () => {
+    const [{ data: categories, error: categoriesError }, { data: products, error: productsError }] = await Promise.all([
+      supabase.from("categories").select("*").order("sort_order").order("name"),
+      supabase.from("products").select("category"),
+    ]);
+    if (categoriesError) throw categoriesError;
+    if (productsError) throw productsError;
+    const counts = new Map<string, number>();
+    for (const product of products) counts.set(product.category, (counts.get(product.category) ?? 0) + 1);
+    return categories.map((category) => ({ ...category, productCount: counts.get(category.name) ?? 0 }));
+  },
+});
+
+export async function deleteCategory(id: string) {
+  const { data: category, error: categoryError } = await supabase.from("categories").select("name").eq("id", id).single();
+  if (categoryError) throw categoryError;
+  const { count, error: countError } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("category", category.name);
+  if (countError) throw countError;
+  if ((count ?? 0) > 0) throw new Error(`Cannot delete this category because ${count} product${count === 1 ? " is" : "s are"} still assigned to it. Reassign the product${count === 1 ? "" : "s"} first.`);
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export function matchesAudience(productAudience: string | null | undefined, selected: CustomerAudience | "" | undefined) {
   if (!selected) return true;
   const audience = productAudience || "unisex";

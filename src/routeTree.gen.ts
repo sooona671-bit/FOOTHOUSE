@@ -31,6 +31,7 @@ import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticat
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdRouteImport } from './routes/admin.$id'
 import { Route as AdminBannerRouteImport } from './routes/admin.banner'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminForgotRouteImport } from './routes/admin_.forgot'
@@ -155,6 +156,11 @@ const AdminBannerRoute = AdminBannerRouteImport.update({
   path: '/banner',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNewRoute = AdminNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -237,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/forgot': typeof AdminForgotRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/forgot': typeof AdminForgotRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/banner': typeof AdminBannerRoute
+  '/admin/categories': typeof AdminCategoriesRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin_/forgot': typeof AdminForgotRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/$id'
     | '/admin/banner'
+    | '/admin/categories'
     | '/admin/new'
     | '/admin/notifications'
     | '/admin/forgot'
@@ -377,6 +387,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/$id'
     | '/admin/banner'
+    | '/admin/categories'
     | '/admin/new'
     | '/admin/notifications'
     | '/admin/forgot'
@@ -413,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wishlist'
     | '/admin/$id'
     | '/admin/banner'
+    | '/admin/categories'
     | '/admin/new'
     | '/admin/notifications'
     | '/admin_/forgot'
@@ -597,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannerRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/new': {
       id: '/admin/new'
       path: '/new'
@@ -726,6 +745,7 @@ const AuthenticatedRouteRouteWithChildren =
 interface AdminRouteChildren {
   AdminIdRoute: typeof AdminIdRoute
   AdminBannerRoute: typeof AdminBannerRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminNewRoute: typeof AdminNewRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -734,6 +754,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIdRoute: AdminIdRoute,
   AdminBannerRoute: AdminBannerRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
   AdminNewRoute: AdminNewRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminIndexRoute: AdminIndexRoute,
