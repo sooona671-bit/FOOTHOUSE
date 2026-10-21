@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { fhButton, OrDivider, Screen, ScreenHeader } from "@/components/fh/primitives";
+import { fhButton, Icon, OrDivider, Screen, ScreenHeader } from "@/components/fh/primitives";
 import { SocialAuth } from "@/components/fh/SocialAuth";
 
 export const Route = createFileRoute("/auth/")({
@@ -43,11 +43,13 @@ function AuthChoice() {
             Sign up
           </Link>
         </p>
-        <Link to="/home" className={fhButton({ variant: "outline", size: "lg" })}>
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">person</span>
-          Continue as guest
-        </Link>
-        <p className="-mt-2 pb-4 text-center text-xs text-muted-foreground">Browse and order without an account</p>
+        <div className="space-y-2 pb-4 text-center">
+          <Link to="/home" className={fhButton({ variant: "outline", size: "lg" })}>
+            <Icon name="person" />
+            Continue as guest
+          </Link>
+          <p className="text-xs text-muted-foreground">Browse and order without an account</p>
+        </div>
       </div>
     </Screen>
   );
