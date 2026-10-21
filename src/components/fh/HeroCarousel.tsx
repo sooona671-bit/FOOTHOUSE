@@ -21,8 +21,9 @@ function BannerLink({ target, className, children }: { target: ReturnType<typeof
   return <Link to={target.to} className={className}>{children}</Link>;
 }
 
-export function HeroSlide({ banner, index, total, priority = false, imageUrl, mode = "responsive" }: { banner: HomeBanner; index: number; total: number; priority?: boolean; imageUrl?: string; mode?: "responsive" | "phone" | "laptop" }) {
+export function HeroSlide({ banner, index, total, priority = false, imageUrl, mode = "responsive" }: { banner: HomeBanner; index: number; total: number; priority?: boolean; imageUrl?: string | undefined; mode?: "responsive" | "phone" | "laptop" }) {
   const color = banner.text_color === "dark" ? "dark" : "light";
+  const overlay = banner.overlay === "soft" || banner.overlay === "strong" ? banner.overlay : "none";
   const align = banner.text_align === "center" ? "items-center text-center" : "items-start text-left";
   const target = resolveLink(banner.button_link);
   const content = (
@@ -40,8 +41,8 @@ export function HeroSlide({ banner, index, total, priority = false, imageUrl, mo
   const slide = (
     <div className={`relative min-h-[190px] w-full shrink-0 snap-center select-none overflow-hidden rounded-3xl ${mode === "phone" ? "aspect-[16/9]" : mode === "laptop" ? "h-[340px] xl:h-[360px]" : "aspect-[16/9] lg:h-[340px] lg:aspect-auto xl:h-[360px]"} ${color === "dark" ? "text-black" : "text-white"}`} aria-label={`${index + 1} of ${total}`}>
       <img src={imageUrl ?? bannerImage(banner)} alt={banner.title || "FOOT HOUSE banner"} width={1920} height={1080} decoding="async" draggable={false} fetchPriority={priority ? "high" : "auto"} loading={priority ? "eager" : "lazy"} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
-      {banner.overlay !== "none" && <div className={`pointer-events-none absolute inset-0 ${overlayClasses[color][banner.overlay]}`} />}
-      {banner.text_align === "center" && banner.overlay !== "none" && <div className="pointer-events-none absolute inset-0" />}
+      {overlay !== "none" && <div className={`pointer-events-none absolute inset-0 ${overlayClasses[color][overlay]}`} />}
+      {banner.text_align === "center" && overlay !== "none" && <div className="pointer-events-none absolute inset-0" />}
       {banner.button_text ? content : <BannerLink target={target} className="absolute inset-0 z-20">{content}</BannerLink>}
     </div>
   );
@@ -97,7 +98,7 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
   useEffect(() => {
     const root = carousel.current;
     if (!root || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.1 });
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry?.isIntersecting ?? false), { threshold: 0.1 });
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
@@ -129,7 +130,7 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
         <div className="pointer-events-none absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-1.5">
           {slides.map((banner, index) => <button key={banner.id} type="button" aria-label={`Go to banner ${index + 1}`} onClick={() => goTo(index)} className={`pointer-events-auto relative h-1.5 overflow-hidden rounded-full ${index === active ? "w-6 bg-white/40" : "w-2 bg-white/60"}`}><span key={`${banner.id}-${index === active ? dotCycle : "idle"}`} style={index === active && !reduced ? { animationDuration: `${AUTOPLAY_MS}ms` } : undefined} className={index === active && !reduced ? "block h-full origin-left animate-[banner-dot-fill_linear_forwards] rounded-full bg-white" : "block h-full w-full rounded-full bg-white/60"} /></button>)}
         </div>
-        <img src={bannerImage(slides[(active + 1) % slides.length])} alt="" aria-hidden="true" width={1920} height={800} loading="eager" decoding="async" className="hidden" />
+        {(() => { const nextSlide = slides[(active + 1) % slides.length]; return nextSlide ? <img src={bannerImage(nextSlide)} alt="" aria-hidden="true" width={1920} height={800} loading="eager" decoding="async" className="hidden" /> : null; })()}
       </>}
     </div>
   );

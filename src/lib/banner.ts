@@ -60,8 +60,11 @@ export async function moveBanner(id: string, direction: "up" | "down") {
   const index = items.findIndex((banner) => banner.id === id);
   const swap = index + (direction === "up" ? -1 : 1);
   if (index < 0 || swap < 0 || swap >= items.length) return;
-  await updateBanner(id, { sort_order: items[swap].sort_order });
-  await updateBanner(items[swap].id, { sort_order: items[index].sort_order });
+  const current = items[index];
+  const neighbour = items[swap];
+  if (!current || !neighbour) return;
+  await updateBanner(id, { sort_order: neighbour.sort_order });
+  await updateBanner(neighbour.id, { sort_order: current.sort_order });
 }
 
 export function useMoveBanner() {
@@ -71,7 +74,7 @@ export function useMoveBanner() {
       const items = qc.getQueryData<HomeBanner[]>(adminBannersQuery.queryKey) ?? []; const i = items.findIndex((b) => b.id === id); const j = i + (direction === "up" ? -1 : 1); if (i < 0 || j < 0 || j >= items.length) return;
       await moveBanner(id, direction);
     },
-    onMutate: async ({ id, direction }) => { await qc.cancelQueries({ queryKey: adminBannersQuery.queryKey }); const previous = qc.getQueryData<HomeBanner[]>(adminBannersQuery.queryKey); qc.setQueryData<HomeBanner[]>(adminBannersQuery.queryKey, (items = []) => { const next = [...items]; const i = next.findIndex((b) => b.id === id); const j = i + (direction === "up" ? -1 : 1); if (i >= 0 && j >= 0 && j < next.length) [next[i], next[j]] = [next[j], next[i]]; return next; }); return { previous }; },
+    onMutate: async ({ id, direction }) => { await qc.cancelQueries({ queryKey: adminBannersQuery.queryKey }); const previous = qc.getQueryData<HomeBanner[]>(adminBannersQuery.queryKey); qc.setQueryData<HomeBanner[]>(adminBannersQuery.queryKey, (items = []) => { const next = [...items]; const i = next.findIndex((b) => b.id === id); const j = i + (direction === "up" ? -1 : 1); const current = next[i]; const neighbour = next[j]; if (current && neighbour) [next[i], next[j]] = [neighbour, current]; return next; }); return { previous }; },
     onError: (_error, _variables, context) => qc.setQueryData(adminBannersQuery.queryKey, context?.previous),
     onSettled: () => qc.invalidateQueries({ queryKey: ["home-banners"] }),
   });

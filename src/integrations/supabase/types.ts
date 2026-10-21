@@ -191,12 +191,12 @@ export type Database = {
           eyebrow: string
           id: string
           image_path: string | null
-          overlay: string
+          overlay: "none" | "soft" | "strong"
           sort_order: number
           starts_at: string
           subtitle: string
-          text_align: string
-          text_color: string
+          text_align: "left" | "center"
+          text_color: "light" | "dark"
           title: string
           updated_at: string
         }
@@ -209,12 +209,12 @@ export type Database = {
           eyebrow?: string
           id?: string
           image_path?: string | null
-          overlay?: string
+          overlay?: "none" | "soft" | "strong"
           sort_order?: number
           starts_at?: string
           subtitle?: string
-          text_align?: string
-          text_color?: string
+          text_align?: "left" | "center"
+          text_color?: "light" | "dark"
           title?: string
           updated_at?: string
         }
@@ -227,12 +227,12 @@ export type Database = {
           eyebrow?: string
           id?: string
           image_path?: string | null
-          overlay?: string
+          overlay?: "none" | "soft" | "strong"
           sort_order?: number
           starts_at?: string
           subtitle?: string
-          text_align?: string
-          text_color?: string
+          text_align?: "left" | "center"
+          text_color?: "light" | "dark"
           title?: string
           updated_at?: string
         }
