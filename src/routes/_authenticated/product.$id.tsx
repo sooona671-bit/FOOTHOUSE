@@ -9,6 +9,9 @@ import { useWhatsAppOrder } from "@/lib/whatsapp";
 import { FhButton, Icon, ScreenHeader } from "@/components/fh/primitives";
 import { BottomNav } from "@/components/fh/StoreLayout";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { GuestOrderSheet } from "@/components/fh/GuestOrderSheet";
+import type { GuestDetails } from "@/lib/guest-details";
 
 export const Route = createFileRoute("/_authenticated/product/$id")({
   head: () => ({
@@ -28,7 +31,9 @@ function ProductPage() {
   const cart = useCart();
   const wish = useWishlist();
   const requireAuth = useRequireAuth();
+  const { user } = useAuth();
   const order = useWhatsAppOrder();
+  const [guestOrderOpen, setGuestOrderOpen] = useState(false);
   const [img, setImg] = useState(0);
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
@@ -72,9 +77,16 @@ function ProductPage() {
     await cart.add({ productId: p.id, size, color });
   };
   const buyNow = async () => {
-    if (!requireAuth()) return;
     if (!pickOk()) return;
+    if (!user) {
+      setGuestOrderOpen(true);
+      return;
+    }
     await order.send([{ productId: p.id, name: p.name, price: Number(p.price), size, color, quantity: 1, imagePath: p.images[0] }]);
+  };
+  const sendGuestOrder = async (guest: GuestDetails) => {
+    const sent = await order.send([{ productId: p.id, name: p.name, price: Number(p.price), size, color, quantity: 1, imagePath: p.images[0] }], guest);
+    if (sent) setGuestOrderOpen(false);
   };
 
   const galleryImages: (string | null)[] = p.imageUrls.length ? p.imageUrls : [null];
@@ -114,6 +126,7 @@ function ProductPage() {
   };
 
   return (
+    <>
     <Shell right={
       <button aria-label="Wishlist" onClick={() => requireAuth(() => wish.toggle(p.id))} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface">
         <Icon name="favorite" filled={wish.has(p.id)} className="text-[22px]" />
@@ -228,6 +241,7 @@ function ProductPage() {
               <Icon name="chat" className="text-[20px]" />
               {soldOut ? "Sold Out" : order.sending ? "Opening WhatsApp…" : "Buy Now on WhatsApp"}
             </FhButton>
+            {!user && <p className="text-center text-xs text-muted-foreground">No account needed. We'll ask for your delivery details.</p>}
             <FhButton variant="outline" className="w-full" disabled={soldOut || cart.adding} onClick={addToBag}>
               <Icon name="shopping_bag" className="text-[20px]" />
               {cart.adding ? "Adding…" : "Add to Bag"}
@@ -236,6 +250,8 @@ function ProductPage() {
         </div>
       </div>
     </Shell>
+    <GuestOrderSheet open={guestOrderOpen} onOpenChange={setGuestOrderOpen} onSubmit={sendGuestOrder} sending={order.sending} />
+    </>
   );
 }
 

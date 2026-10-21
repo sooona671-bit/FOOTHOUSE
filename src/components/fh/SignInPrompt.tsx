@@ -24,7 +24,7 @@ export function SignInPrompt({ open, onOpenChange }: { open: boolean; onOpenChan
         <DialogHeader>
           <DialogTitle className="text-center text-xl text-foreground">Sign in to continue</DialogTitle>
           <DialogDescription className="pt-2 text-center text-sm leading-6 text-muted-foreground">
-            Create an account or sign in to save favourites, fill your bag and order.
+            Create an account or sign in to save your bag and favourites.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-2 gap-2 sm:flex-col sm:space-x-0">

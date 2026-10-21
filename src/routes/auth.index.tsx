@@ -43,7 +43,11 @@ function AuthChoice() {
             Sign up
           </Link>
         </p>
-        <Link to="/home" className="block pb-4 text-center text-sm text-muted-foreground underline underline-offset-4">Skip for now</Link>
+        <Link to="/home" className={fhButton({ variant: "outline", size: "lg" })}>
+          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">person</span>
+          Continue as guest
+        </Link>
+        <p className="-mt-2 pb-4 text-center text-xs text-muted-foreground">Browse and order without an account</p>
       </div>
     </Screen>
   );
